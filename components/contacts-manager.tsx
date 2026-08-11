@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -30,8 +31,44 @@ interface Contact {
   location: string | null;
 }
 
+type SortKey = "name" | "pledge_year";
+
+function pledgeYearValue(value: string | null): number {
+  if (!value) return Infinity;
+  const match = value.match(/\d{2,4}/);
+  if (!match) return Infinity;
+  const year = parseInt(match[0], 10);
+  return year < 100 ? year + 2000 : year;
+}
+
 export function ContactsManager({ contacts }: { contacts: Contact[] }) {
   const router = useRouter();
+  const [sortKey, setSortKey] = useState<SortKey>("name");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  }
+
+  const sortedContacts = useMemo(() => {
+    const sorted = [...contacts].sort((a, b) => {
+      if (sortKey === "name") {
+        return a.name.localeCompare(b.name);
+      }
+      return pledgeYearValue(a.pledge_year) - pledgeYearValue(b.pledge_year);
+    });
+    return sortDir === "asc" ? sorted : sorted.reverse();
+  }, [contacts, sortKey, sortDir]);
+
+  function sortIndicator(key: SortKey) {
+    if (sortKey !== key) return null;
+    return sortDir === "asc" ? " ▲" : " ▼";
+  }
 
   async function handleRemove(id: string) {
     if (!confirm("Remove this contact?")) return;
@@ -50,8 +87,24 @@ export function ContactsManager({ contacts }: { contacts: Contact[] }) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Pledge Year</TableHead>
+              <TableHead>
+                <button
+                  type="button"
+                  onClick={() => toggleSort("name")}
+                  className="hover:text-foreground"
+                >
+                  Name{sortIndicator("name")}
+                </button>
+              </TableHead>
+              <TableHead>
+                <button
+                  type="button"
+                  onClick={() => toggleSort("pledge_year")}
+                  className="hover:text-foreground"
+                >
+                  Pledge Year{sortIndicator("pledge_year")}
+                </button>
+              </TableHead>
               <TableHead>Job Title</TableHead>
               <TableHead>Employer</TableHead>
               <TableHead>Phone</TableHead>
@@ -60,7 +113,7 @@ export function ContactsManager({ contacts }: { contacts: Contact[] }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {contacts.map((contact) => (
+            {sortedContacts.map((contact) => (
               <TableRow key={contact.id}>
                 <TableCell className="font-medium">{contact.name}</TableCell>
                 <TableCell className="text-muted-foreground">
@@ -115,7 +168,7 @@ export function ContactsManager({ contacts }: { contacts: Contact[] }) {
                 </TableCell>
               </TableRow>
             ))}
-            {contacts.length === 0 && (
+            {sortedContacts.length === 0 && (
               <TableRow>
                 <TableCell colSpan={7} className="text-center text-muted-foreground">
                   No contacts yet.

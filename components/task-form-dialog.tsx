@@ -43,8 +43,14 @@ interface Member {
   name: string;
 }
 
-interface TaskFormValues {
+interface Board {
+  id: string;
+  name: string;
+}
+
+export interface TaskFormValues {
   id?: string;
+  board_id: string;
   title: string;
   description: string;
   owner_id: string | null;
@@ -54,23 +60,28 @@ interface TaskFormValues {
   recurrence_rule: RecurrenceRule | "none";
 }
 
-const DEFAULT_VALUES: TaskFormValues = {
-  title: "",
-  description: "",
-  owner_id: null,
-  due_date: "",
-  status: "not_started",
-  priority: "normal",
-  recurrence_rule: "none",
-};
+function defaultValues(defaultBoardId: string): TaskFormValues {
+  return {
+    board_id: defaultBoardId,
+    title: "",
+    description: "",
+    owner_id: null,
+    due_date: "",
+    status: "not_started",
+    priority: "normal",
+    recurrence_rule: "none",
+  };
+}
 
 export function TaskFormDialog({
-  boardId,
+  boards,
+  defaultBoardId,
   members,
   trigger,
   initial,
 }: {
-  boardId: string;
+  boards: Board[];
+  defaultBoardId: string;
   members: Member[];
   trigger: React.ReactElement;
   initial?: TaskFormValues;
@@ -78,7 +89,9 @@ export function TaskFormDialog({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [values, setValues] = useState<TaskFormValues>(initial ?? DEFAULT_VALUES);
+  const [values, setValues] = useState<TaskFormValues>(
+    initial ?? defaultValues(defaultBoardId)
+  );
 
   function update<K extends keyof TaskFormValues>(key: K, value: TaskFormValues[K]) {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -90,7 +103,7 @@ export function TaskFormDialog({
     const supabase = createClient();
 
     const payload = {
-      board_id: boardId,
+      board_id: values.board_id,
       title: values.title,
       description: values.description || null,
       owner_id: values.owner_id,
@@ -125,6 +138,27 @@ export function TaskFormDialog({
           <DialogHeader>
             <DialogTitle>{values.id ? "Edit task" : "New task"}</DialogTitle>
           </DialogHeader>
+
+          <div className="flex flex-col gap-1.5">
+            <Label>Board</Label>
+            <Select
+              value={values.board_id}
+              onValueChange={(v) => v && update("board_id", v)}
+            >
+              <SelectTrigger>
+                <SelectValue>
+                  {(v: string) => boards.find((b) => b.id === v)?.name ?? ""}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {boards.map((b) => (
+                  <SelectItem key={b.id} value={b.id}>
+                    {b.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="title">Title</Label>

@@ -15,14 +15,23 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { BOARD_CATEGORIES, type BoardCategory } from "@/lib/supabase/types";
 
 export interface BoardFormValues {
   id?: string;
   name: string;
   description: string;
+  category: BoardCategory | "none";
 }
 
-const DEFAULT_VALUES: BoardFormValues = { name: "", description: "" };
+const DEFAULT_VALUES: BoardFormValues = { name: "", description: "", category: "none" };
 
 export function BoardFormDialog({
   trigger,
@@ -44,6 +53,7 @@ export function BoardFormDialog({
     const payload = {
       name: values.name,
       description: values.description || null,
+      category: values.category === "none" ? null : values.category,
     };
 
     if (values.id) {
@@ -85,6 +95,30 @@ export function BoardFormDialog({
                 setValues((prev) => ({ ...prev, description: e.target.value }))
               }
             />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label>Category</Label>
+            <Select
+              value={values.category}
+              onValueChange={(v) =>
+                v && setValues((prev) => ({ ...prev, category: v as BoardCategory | "none" }))
+              }
+            >
+              <SelectTrigger>
+                <SelectValue>
+                  {(v: BoardCategory | "none") => (v === "none" ? "None" : v)}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                {BOARD_CATEGORIES.map((c) => (
+                  <SelectItem key={c} value={c}>
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <DialogFooter>

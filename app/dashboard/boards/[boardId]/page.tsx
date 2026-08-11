@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { requireCurrentUser } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
+import { Badge } from "@/components/ui/badge";
 import { BoardTaskTable } from "@/components/board-task-table";
 
 export default async function BoardPage({
@@ -12,9 +13,14 @@ export default async function BoardPage({
   const currentUser = await requireCurrentUser();
   const supabase = await createClient();
 
-  const [{ data: board }, { data: tasks }, { data: members }] =
+  const [{ data: board }, { data: allBoards }, { data: tasks }, { data: members }] =
     await Promise.all([
-      supabase.from("boards").select("id, name, description").eq("id", boardId).maybeSingle(),
+      supabase
+        .from("boards")
+        .select("id, name, description, category")
+        .eq("id", boardId)
+        .maybeSingle(),
+      supabase.from("boards").select("id, name").order("name"),
       supabase
         .from("tasks")
         .select(
@@ -31,6 +37,15 @@ export default async function BoardPage({
 
   const nameById = new Map((members ?? []).map((m) => [m.id, m.name]));
 
+  const taskIds = (tasks ?? []).map((t) => t.id);
+  const { data: commentRows } = taskIds.length
+    ? await supabase.from("task_comments").select("task_id").in("task_id", taskIds)
+    : { data: [] };
+  const commentCountByTask = new Map<string, number>();
+  for (const row of commentRows ?? []) {
+    commentCountByTask.set(row.task_id, (commentCountByTask.get(row.task_id) ?? 0) + 1);
+  }
+
   const rows = (tasks ?? []).map((t) => ({
     id: t.id,
     title: t.title,
@@ -41,14 +56,18 @@ export default async function BoardPage({
     priority: t.priority,
     recurrence_rule: t.recurrence_rule,
     owner_name: (t.owner_id && nameById.get(t.owner_id)) || null,
+    commentCount: commentCountByTask.get(t.id) ?? 0,
   }));
 
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-primary">
-          {board.name}
-        </h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-bold tracking-tight text-primary">
+            {board.name}
+          </h1>
+          {board.category && <Badge variant="secondary">{board.category}</Badge>}
+        </div>
         {board.description && (
           <p className="text-sm text-muted-foreground">{board.description}</p>
         )}
@@ -56,6 +75,7 @@ export default async function BoardPage({
 
       <BoardTaskTable
         boardId={boardId}
+        boards={allBoards ?? []}
         tasks={rows}
         members={members ?? []}
         currentUserId={currentUser.id}

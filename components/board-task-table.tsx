@@ -21,6 +21,7 @@ import {
 import { StatusBadge, STATUS_LABELS } from "@/components/status-badge";
 import { DueDateBadge } from "@/components/due-date-badge";
 import { TaskFormDialog } from "@/components/task-form-dialog";
+import { TaskCommentsDialog } from "@/components/task-comments-dialog";
 import type { TaskStatus } from "@/lib/supabase/types";
 
 interface Member {
@@ -38,16 +39,24 @@ interface TaskRow {
   priority: string;
   recurrence_rule: "weekly" | "monthly" | "semester" | null;
   owner_name: string | null;
+  commentCount: number;
+}
+
+interface Board {
+  id: string;
+  name: string;
 }
 
 export function BoardTaskTable({
   boardId,
+  boards,
   tasks,
   members,
   currentUserId,
   isAlumni,
 }: {
   boardId: string;
+  boards: Board[];
   tasks: TaskRow[];
   members: Member[];
   currentUserId: string;
@@ -73,7 +82,8 @@ export function BoardTaskTable({
       {isAlumni && (
         <div className="flex justify-end">
           <TaskFormDialog
-            boardId={boardId}
+            boards={boards}
+            defaultBoardId={boardId}
             members={members}
             trigger={<Button>New task</Button>}
           />
@@ -89,6 +99,7 @@ export function BoardTaskTable({
               <TableHead>Due</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Priority</TableHead>
+              <TableHead>Comments</TableHead>
               {isAlumni && <TableHead className="text-right">Actions</TableHead>}
             </TableRow>
           </TableHeader>
@@ -138,11 +149,23 @@ export function BoardTaskTable({
                   <TableCell className="capitalize text-muted-foreground">
                     {task.priority}
                   </TableCell>
+                  <TableCell>
+                    <TaskCommentsDialog
+                      taskId={task.id}
+                      members={members}
+                      trigger={
+                        <Button variant="outline" size="sm">
+                          {task.commentCount > 0 ? task.commentCount : "Comment"}
+                        </Button>
+                      }
+                    />
+                  </TableCell>
                   {isAlumni && (
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <TaskFormDialog
-                          boardId={boardId}
+                          boards={boards}
+                          defaultBoardId={boardId}
                           members={members}
                           trigger={
                             <Button variant="outline" size="sm">
@@ -151,6 +174,7 @@ export function BoardTaskTable({
                           }
                           initial={{
                             id: task.id,
+                            board_id: boardId,
                             title: task.title,
                             description: task.description ?? "",
                             owner_id: task.owner_id,
@@ -161,7 +185,8 @@ export function BoardTaskTable({
                           }}
                         />
                         <TaskFormDialog
-                          boardId={boardId}
+                          boards={boards}
+                          defaultBoardId={boardId}
                           members={members}
                           trigger={
                             <Button variant="outline" size="sm">
@@ -169,6 +194,7 @@ export function BoardTaskTable({
                             </Button>
                           }
                           initial={{
+                            board_id: boardId,
                             title: `${task.title} (Copy)`,
                             description: task.description ?? "",
                             owner_id: task.owner_id,
@@ -194,7 +220,7 @@ export function BoardTaskTable({
             })}
             {tasks.length === 0 && (
               <TableRow>
-                <TableCell colSpan={isAlumni ? 6 : 5} className="text-center text-muted-foreground">
+                <TableCell colSpan={isAlumni ? 7 : 6} className="text-center text-muted-foreground">
                   No tasks on this board yet.
                 </TableCell>
               </TableRow>

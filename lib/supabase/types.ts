@@ -9,6 +9,15 @@ export const EXEC_POSITIONS = [
 export type ExecPosition = (typeof EXEC_POSITIONS)[number];
 export type TaskStatus = "not_started" | "in_progress" | "done" | "blocked";
 export type RecurrenceRule = "weekly" | "monthly" | "semester";
+export const BOARD_CATEGORIES = [
+  "Administrative",
+  "Community Service",
+  "Cultural",
+  "Intake",
+  "Fundraising",
+  "Social",
+] as const;
+export type BoardCategory = (typeof BOARD_CATEGORIES)[number];
 
 export interface Database {
   public: {
@@ -57,15 +66,18 @@ export interface Database {
           id: string;
           name: string;
           description: string | null;
+          category: BoardCategory | null;
         };
         Insert: {
           id?: string;
           name: string;
           description?: string | null;
+          category?: BoardCategory | null;
         };
         Update: Partial<{
           name: string;
           description: string | null;
+          category: BoardCategory | null;
         }>;
         Relationships: [];
       };
@@ -201,6 +213,36 @@ export interface Database {
           name: string;
           position: string;
         }>;
+        Relationships: [];
+      };
+      task_comments: {
+        Row: {
+          id: string;
+          task_id: string;
+          author_id: string;
+          body: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          task_id: string;
+          author_id: string;
+          body: string;
+          created_at?: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
+      comment_mentions: {
+        Row: {
+          comment_id: string;
+          user_id: string;
+        };
+        Insert: {
+          comment_id: string;
+          user_id: string;
+        };
+        Update: never;
         Relationships: [];
       };
     };
