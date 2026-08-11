@@ -29,7 +29,13 @@ interface ExecBoardMember {
   position: string;
 }
 
-export function ExecBoardManager({ members }: { members: ExecBoardMember[] }) {
+export function ExecBoardManager({
+  members,
+  isAlumni,
+}: {
+  members: ExecBoardMember[];
+  isAlumni: boolean;
+}) {
   const router = useRouter();
   const [name, setName] = useState("");
   const [position, setPosition] = useState<ExecPosition>(EXEC_POSITIONS[0]);
@@ -55,42 +61,44 @@ export function ExecBoardManager({ members }: { members: ExecBoardMember[] }) {
 
   return (
     <div className="flex flex-col gap-6">
-      <form
-        onSubmit={handleAdd}
-        className="flex flex-wrap items-end gap-3 rounded-lg border border-border p-4"
-      >
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="name">Name</Label>
-          <Input
-            id="name"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-48"
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label>Position</Label>
-          <Select
-            value={position}
-            onValueChange={(v) => v && setPosition(v as ExecPosition)}
-          >
-            <SelectTrigger className="w-56">
-              <SelectValue>{(v: ExecPosition) => v}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {EXEC_POSITIONS.map((p) => (
-                <SelectItem key={p} value={p}>
-                  {p}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <Button type="submit" disabled={saving}>
-          {saving ? "Adding…" : "Add member"}
-        </Button>
-      </form>
+      {isAlumni && (
+        <form
+          onSubmit={handleAdd}
+          className="flex flex-wrap items-end gap-3 rounded-lg border border-border p-4"
+        >
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="name">Name</Label>
+            <Input
+              id="name"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-48"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>Position</Label>
+            <Select
+              value={position}
+              onValueChange={(v) => v && setPosition(v as ExecPosition)}
+            >
+              <SelectTrigger className="w-56">
+                <SelectValue>{(v: ExecPosition) => v}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {EXEC_POSITIONS.map((p) => (
+                  <SelectItem key={p} value={p}>
+                    {p}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <Button type="submit" disabled={saving}>
+            {saving ? "Adding…" : "Add member"}
+          </Button>
+        </form>
+      )}
 
       <div className="overflow-x-auto rounded-lg border border-border">
         <Table>
@@ -98,7 +106,7 @@ export function ExecBoardManager({ members }: { members: ExecBoardMember[] }) {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Position</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              {isAlumni && <TableHead className="text-right">Actions</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -108,21 +116,23 @@ export function ExecBoardManager({ members }: { members: ExecBoardMember[] }) {
                 <TableCell className="text-muted-foreground">
                   {member.position}
                 </TableCell>
-                <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive"
-                    onClick={() => handleRemove(member.id)}
-                  >
-                    Remove
-                  </Button>
-                </TableCell>
+                {isAlumni && (
+                  <TableCell className="text-right">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive"
+                      onClick={() => handleRemove(member.id)}
+                    >
+                      Remove
+                    </Button>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
             {members.length === 0 && (
               <TableRow>
-                <TableCell colSpan={3} className="text-center text-muted-foreground">
+                <TableCell colSpan={isAlumni ? 3 : 2} className="text-center text-muted-foreground">
                   No exec board members yet.
                 </TableCell>
               </TableRow>

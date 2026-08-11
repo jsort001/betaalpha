@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { requireCurrentUser } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/sign-out-button";
@@ -19,12 +20,25 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-sidebar text-sidebar-foreground">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-4">
-          <div className="flex flex-wrap items-center gap-6">
-            <Link href="/dashboard" className="text-lg font-bold tracking-tight">
+        <div className="mx-auto max-w-6xl px-6 py-4">
+          <Link
+            href="/dashboard"
+            className="flex items-center justify-center gap-3"
+          >
+            <Image
+              src="/logo.png"
+              alt="Beta Alpha crest"
+              width={40}
+              height={45}
+              className="h-10 w-auto"
+              priority
+            />
+            <span className="font-heading text-lg font-bold uppercase tracking-wide">
               Beta Alpha Project Manager
-            </Link>
-            <nav className="flex flex-wrap items-center gap-4 text-sm uppercase tracking-wide">
+            </span>
+          </Link>
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+            <nav className="flex flex-wrap items-center gap-4 font-heading text-sm uppercase tracking-wide">
               <Link href="/dashboard" className="hover:underline">
                 My Tasks
               </Link>
@@ -44,13 +58,13 @@ export default async function DashboardLayout({
                 </Link>
               )}
             </nav>
-          </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span>{currentUser.name || currentUser.email}</span>
-            <span className="rounded-full bg-sidebar-accent px-2 py-0.5 text-xs capitalize text-sidebar-accent-foreground">
-              {currentUser.role}
-            </span>
-            <SignOutButton />
+            <div className="flex items-center gap-3 text-sm">
+              <span>{currentUser.name || currentUser.email}</span>
+              <span className="rounded-full bg-sidebar-accent px-2 py-0.5 text-xs capitalize text-sidebar-accent-foreground">
+                {currentUser.role}
+              </span>
+              <SignOutButton />
+            </div>
           </div>
         </div>
       </header>

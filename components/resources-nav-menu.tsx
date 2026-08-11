@@ -45,7 +45,7 @@ export function ResourcesNavMenu() {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
-        className="text-sm uppercase tracking-wide outline-none hover:underline"
+        className="font-heading text-sm uppercase tracking-wide outline-none hover:underline"
         onMouseEnter={openNow}
         onMouseLeave={scheduleClose}
       >
@@ -53,7 +53,7 @@ export function ResourcesNavMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="start"
-        className="uppercase tracking-wide"
+        className="font-heading uppercase tracking-wide"
         onMouseEnter={cancelClose}
         onMouseLeave={scheduleClose}
       >

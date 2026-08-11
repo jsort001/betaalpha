@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ExecBoardManager } from "@/components/exec-board-manager";
 
 export default async function ExecBoardPage() {
-  await requireCurrentUser();
+  const currentUser = await requireCurrentUser();
 
   const supabase = await createClient();
   const { data: members } = await supabase
@@ -21,7 +21,10 @@ export default async function ExecBoardPage() {
           Current undergrad officers and their positions.
         </p>
       </div>
-      <ExecBoardManager members={members ?? []} />
+      <ExecBoardManager
+        members={members ?? []}
+        isAlumni={currentUser.role === "alumni"}
+      />
     </div>
   );
 }

@@ -1,10 +1,18 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+// Chapter brand-guide headline font: titles, headings, menus.
+const stellar = localFont({
+  src: [
+    { path: "../fonts/Stellar-light.otf", weight: "300", style: "normal" },
+    { path: "../fonts/Stellar-Regular.otf", weight: "400", style: "normal" },
+    { path: "../fonts/Stellar-Medium.otf", weight: "500", style: "normal" },
+    { path: "../fonts/Stellar-Bold.otf", weight: "700", style: "normal" },
+  ],
+  variable: "--font-stellar",
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
@@ -28,9 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${stellar.variable} ${geistMono.variable} antialiased`}>
         {children}
       </body>
     </html>
