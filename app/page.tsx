@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,6 +35,14 @@ export default async function Home() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-background p-8">
       <div className="flex flex-col items-center gap-2 text-center">
+        <Image
+          src="/logo.png"
+          alt="Beta Alpha crest"
+          width={96}
+          height={107}
+          className="h-24 w-auto"
+          priority
+        />
         <h1 className="text-3xl font-bold tracking-tight text-primary">
           Beta Alpha Chapter
         </h1>

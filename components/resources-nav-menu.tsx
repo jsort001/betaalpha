@@ -17,6 +17,11 @@ const RESOURCE_LINKS = [
     label: "Zoom Meeting",
     external: true,
   },
+  {
+    href: "https://spacereservations.odu.edu/EmsWebApp/",
+    label: "Room Reservations",
+    external: true,
+  },
 ];
 
 const CLOSE_DELAY_MS = 150;

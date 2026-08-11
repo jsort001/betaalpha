@@ -1,9 +1,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { requireCurrentUser } from "@/lib/current-user";
-import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/sign-out-button";
 import { ResourcesNavMenu } from "@/components/resources-nav-menu";
+import { BOARD_CATEGORIES } from "@/lib/supabase/types";
 
 export default async function DashboardLayout({
   children,
@@ -11,11 +11,6 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const currentUser = await requireCurrentUser();
-  const supabase = await createClient();
-  const { data: boards } = await supabase
-    .from("boards")
-    .select("id, name")
-    .order("name");
 
   return (
     <div className="min-h-screen bg-background">
@@ -42,13 +37,13 @@ export default async function DashboardLayout({
               <Link href="/dashboard" className="hover:underline">
                 My Tasks
               </Link>
-              {boards?.map((board) => (
+              {BOARD_CATEGORIES.map((category) => (
                 <Link
-                  key={board.id}
-                  href={`/dashboard/boards/${board.id}`}
+                  key={category}
+                  href={`/dashboard/categories/${encodeURIComponent(category)}`}
                   className="hover:underline"
                 >
-                  {board.name}
+                  {category}
                 </Link>
               ))}
               <ResourcesNavMenu />
