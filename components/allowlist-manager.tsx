@@ -89,7 +89,9 @@ export function AllowlistManager({ entries }: { entries: AllowlistEntry[] }) {
           <Label>Role</Label>
           <Select value={role} onValueChange={(v) => v && setRole(v as UserRole)}>
             <SelectTrigger className="w-36">
-              <SelectValue />
+              <SelectValue>
+                {(v: UserRole) => (v === "alumni" ? "Alumni" : "Undergrad")}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="undergrad">Undergrad</SelectItem>

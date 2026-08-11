@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { StatusBadge } from "@/components/status-badge";
+import { StatusBadge, STATUS_LABELS } from "@/components/status-badge";
 import { DueDateBadge } from "@/components/due-date-badge";
 import { TaskFormDialog } from "@/components/task-form-dialog";
 import type { TaskStatus } from "@/lib/supabase/types";
@@ -120,7 +120,9 @@ export function BoardTaskTable({
                         onValueChange={(v) => v && updateStatus(task.id, v as TaskStatus)}
                       >
                         <SelectTrigger size="sm" className="w-[130px]">
-                          <SelectValue />
+                          <SelectValue>
+                            {(v: TaskStatus) => STATUS_LABELS[v]}
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="not_started">Not started</SelectItem>

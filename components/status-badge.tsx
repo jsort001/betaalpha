@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import type { TaskStatus } from "@/lib/supabase/types";
 
-const LABELS: Record<TaskStatus, string> = {
+export const STATUS_LABELS: Record<TaskStatus, string> = {
   not_started: "Not started",
   in_progress: "In progress",
   done: "Done",
@@ -16,5 +16,5 @@ const VARIANTS: Record<TaskStatus, "secondary" | "default" | "destructive" | "ou
 };
 
 export function StatusBadge({ status }: { status: TaskStatus }) {
-  return <Badge variant={VARIANTS[status]}>{LABELS[status]}</Badge>;
+  return <Badge variant={VARIANTS[status]}>{STATUS_LABELS[status]}</Badge>;
 }

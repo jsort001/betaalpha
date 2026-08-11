@@ -22,7 +22,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { STATUS_LABELS } from "@/components/status-badge";
 import type { RecurrenceRule, TaskStatus } from "@/lib/supabase/types";
+
+const PRIORITY_LABELS: Record<string, string> = {
+  low: "Low",
+  normal: "Normal",
+  high: "High",
+};
+
+const RECURRENCE_LABELS: Record<RecurrenceRule | "none", string> = {
+  none: "One-time",
+  weekly: "Weekly",
+  monthly: "Monthly",
+  semester: "Semester",
+};
 
 interface Member {
   id: string;
@@ -139,7 +153,13 @@ export function TaskFormDialog({
                 onValueChange={(v) => update("owner_id", v === "unassigned" ? null : v)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Unassigned" />
+                  <SelectValue placeholder="Unassigned">
+                    {(v: string) =>
+                      v === "unassigned"
+                        ? "Unassigned"
+                        : members.find((m) => m.id === v)?.name ?? "Unassigned"
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="unassigned">Unassigned</SelectItem>
@@ -169,7 +189,7 @@ export function TaskFormDialog({
                 onValueChange={(v) => v && update("status", v as TaskStatus)}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>{(v: TaskStatus) => STATUS_LABELS[v]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="not_started">Not started</SelectItem>
@@ -187,7 +207,7 @@ export function TaskFormDialog({
                 onValueChange={(v) => v && update("priority", v)}
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>{(v: string) => PRIORITY_LABELS[v]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="low">Low</SelectItem>
@@ -206,7 +226,9 @@ export function TaskFormDialog({
                 }
               >
                 <SelectTrigger>
-                  <SelectValue />
+                  <SelectValue>
+                    {(v: RecurrenceRule | "none") => RECURRENCE_LABELS[v]}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">One-time</SelectItem>
