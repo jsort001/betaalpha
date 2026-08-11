@@ -122,6 +122,30 @@ export interface Database {
         Update: never;
         Relationships: [];
       };
+      contacts: {
+        Row: {
+          id: string;
+          name: string;
+          email: string | null;
+          phone: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          email?: string | null;
+          phone?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<{
+          name: string;
+          email: string | null;
+          phone: string | null;
+        }>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

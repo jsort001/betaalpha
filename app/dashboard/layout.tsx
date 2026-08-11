@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireCurrentUser } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/sign-out-button";
+import { ResourcesNavMenu } from "@/components/resources-nav-menu";
 
 export default async function DashboardLayout({
   children,
@@ -36,6 +37,7 @@ export default async function DashboardLayout({
                   {board.name}
                 </Link>
               ))}
+              <ResourcesNavMenu />
               {currentUser.role === "alumni" && (
                 <Link href="/dashboard/admin/allowlist" className="hover:underline">
                   Admin
