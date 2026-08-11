@@ -22,10 +22,12 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Beta Alpha Project Manager",
-  description: "Task and duty management for the Beta Alpha chapter.",
+  description:
+    "Task and project management for the Beta Alpha chapter of La Unidad Latina, Lambda Upsilon Lambda Fraternity, Incorporated.",
   openGraph: {
     title: "Beta Alpha Project Manager",
-    description: "Task and duty management for the Beta Alpha chapter.",
+    description:
+    "Task and project management for the Beta Alpha chapter of La Unidad Latina, Lambda Upsilon Lambda Fraternity, Incorporated.",
   },
 };
 

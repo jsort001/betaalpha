@@ -37,6 +37,9 @@ export default async function DashboardLayout({
               <Link href="/dashboard" className="hover:underline">
                 My Tasks
               </Link>
+              <Link href="/dashboard/calendar" className="hover:underline">
+                Calendar
+              </Link>
               {BOARD_CATEGORIES.map((category) => (
                 <Link
                   key={category}

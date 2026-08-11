@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { BoardFormDialog } from "@/components/board-form-dialog";
 import { BoardCardGrid } from "@/components/board-card-grid";
 import { MyTaskList } from "@/components/my-task-list";
+import { TaskFormDialog } from "@/components/task-form-dialog";
 
 export default async function DashboardPage() {
   const currentUser = await requireCurrentUser();
@@ -51,9 +52,19 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-col gap-10">
       <section>
-        <h1 className="mb-4 text-2xl font-bold tracking-tight text-primary">
-          My Tasks
-        </h1>
+        <div className="mb-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold tracking-tight text-primary">
+            My Tasks
+          </h1>
+          {currentUser.role === "alumni" && boards && boards.length > 0 && (
+            <TaskFormDialog
+              boards={boards}
+              defaultBoardId={boards[0].id}
+              members={members ?? []}
+              trigger={<Button size="sm">New task</Button>}
+            />
+          )}
+        </div>
         {myTasks && myTasks.length > 0 ? (
           <MyTaskList
             tasks={myTasks.map((task) => ({

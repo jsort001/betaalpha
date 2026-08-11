@@ -22,6 +22,11 @@ const RESOURCE_LINKS = [
     label: "Room Reservations",
     external: true,
   },
+  {
+    href: "https://www.odu.edu/academics/calendar/2026-2027",
+    label: "Academic Calendar",
+    external: true,
+  },
 ];
 
 const CLOSE_DELAY_MS = 150;
