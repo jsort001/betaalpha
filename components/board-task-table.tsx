@@ -160,6 +160,24 @@ export function BoardTaskTable({
                             recurrence_rule: task.recurrence_rule ?? "none",
                           }}
                         />
+                        <TaskFormDialog
+                          boardId={boardId}
+                          members={members}
+                          trigger={
+                            <Button variant="outline" size="sm">
+                              Clone
+                            </Button>
+                          }
+                          initial={{
+                            title: `${task.title} (Copy)`,
+                            description: task.description ?? "",
+                            owner_id: task.owner_id,
+                            due_date: task.due_date ?? "",
+                            status: "not_started",
+                            priority: task.priority,
+                            recurrence_rule: task.recurrence_rule ?? "none",
+                          }}
+                        />
                         <Button
                           variant="ghost"
                           size="sm"
