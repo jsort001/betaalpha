@@ -1,0 +1,129 @@
+export type UserRole = "undergrad" | "alumni";
+export type TaskStatus = "not_started" | "in_progress" | "done" | "blocked";
+export type RecurrenceRule = "weekly" | "monthly" | "semester";
+
+export interface Database {
+  public: {
+    Tables: {
+      users: {
+        Row: {
+          id: string;
+          email: string;
+          name: string;
+          role: UserRole;
+          created_at: string;
+        };
+        Insert: {
+          id: string;
+          email: string;
+          name: string;
+          role: UserRole;
+          created_at?: string;
+        };
+        Update: Partial<{
+          email: string;
+          name: string;
+          role: UserRole;
+        }>;
+        Relationships: [];
+      };
+      allowlist: {
+        Row: {
+          email: string;
+          name: string;
+          assigned_role: UserRole;
+        };
+        Insert: {
+          email: string;
+          name: string;
+          assigned_role: UserRole;
+        };
+        Update: Partial<{
+          name: string;
+          assigned_role: UserRole;
+        }>;
+        Relationships: [];
+      };
+      boards: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+        };
+        Update: Partial<{
+          name: string;
+          description: string | null;
+        }>;
+        Relationships: [];
+      };
+      tasks: {
+        Row: {
+          id: string;
+          board_id: string;
+          title: string;
+          description: string | null;
+          owner_id: string | null;
+          due_date: string | null;
+          status: TaskStatus;
+          priority: string;
+          recurrence_rule: RecurrenceRule | null;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          board_id: string;
+          title: string;
+          description?: string | null;
+          owner_id?: string | null;
+          due_date?: string | null;
+          status?: TaskStatus;
+          priority?: string;
+          recurrence_rule?: RecurrenceRule | null;
+          created_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<{
+          board_id: string;
+          title: string;
+          description: string | null;
+          owner_id: string | null;
+          due_date: string | null;
+          status: TaskStatus;
+          priority: string;
+          recurrence_rule: RecurrenceRule | null;
+        }>;
+        Relationships: [];
+      };
+      task_history: {
+        Row: {
+          id: string;
+          task_id: string;
+          changed_by: string | null;
+          change_type: string;
+          details: Record<string, unknown> | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          task_id: string;
+          changed_by?: string | null;
+          change_type: string;
+          details?: Record<string, unknown> | null;
+          created_at?: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
+    };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+  };
+}
