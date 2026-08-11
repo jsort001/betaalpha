@@ -16,7 +16,7 @@ const RESOURCE_LINKS = [
 export function ResourcesNavMenu() {
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="text-sm outline-none hover:underline">
+      <DropdownMenuTrigger className="text-sm uppercase tracking-wide outline-none hover:underline">
         Resources
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="uppercase tracking-wide">
