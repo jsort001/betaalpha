@@ -40,6 +40,9 @@ yarn-error.log*
 # secrets (not part of the app, kept locally only)
 BA App Oauth.rtf
 
+# source data with member PII, not part of the app
+Beta Alpha - Hermano Professional Contacts Directory.xlsx
+
 # local Claude Code settings
 .claude/settings.local.json
 

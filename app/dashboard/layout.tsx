@@ -24,7 +24,7 @@ export default async function DashboardLayout({
             <Link href="/dashboard" className="text-lg font-bold tracking-tight">
               Beta Alpha
             </Link>
-            <nav className="flex flex-wrap items-center gap-4 text-sm">
+            <nav className="flex flex-wrap items-center gap-4 text-sm uppercase tracking-wide">
               <Link href="/dashboard" className="hover:underline">
                 My Tasks
               </Link>

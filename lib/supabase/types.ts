@@ -1,4 +1,12 @@
 export type UserRole = "undergrad" | "alumni";
+export const EXEC_POSITIONS = [
+  "President",
+  "Vice President",
+  "Treasurer",
+  "PR",
+  "Community Service Chair",
+] as const;
+export type ExecPosition = (typeof EXEC_POSITIONS)[number];
 export type TaskStatus = "not_started" | "in_progress" | "done" | "blocked";
 export type RecurrenceRule = "weekly" | "monthly" | "semester";
 
@@ -128,6 +136,16 @@ export interface Database {
           name: string;
           email: string | null;
           phone: string | null;
+          pledge_year: string | null;
+          major: string | null;
+          undergrad_grad_date: string | null;
+          grad_degree: string | null;
+          school_attended: string | null;
+          grad_school_grad_date: string | null;
+          job_field: string | null;
+          employer: string | null;
+          job_title: string | null;
+          location: string | null;
           created_by: string | null;
           created_at: string;
         };
@@ -136,6 +154,16 @@ export interface Database {
           name: string;
           email?: string | null;
           phone?: string | null;
+          pledge_year?: string | null;
+          major?: string | null;
+          undergrad_grad_date?: string | null;
+          grad_degree?: string | null;
+          school_attended?: string | null;
+          grad_school_grad_date?: string | null;
+          job_field?: string | null;
+          employer?: string | null;
+          job_title?: string | null;
+          location?: string | null;
           created_by?: string | null;
           created_at?: string;
         };
@@ -143,6 +171,35 @@ export interface Database {
           name: string;
           email: string | null;
           phone: string | null;
+          pledge_year: string | null;
+          major: string | null;
+          undergrad_grad_date: string | null;
+          grad_degree: string | null;
+          school_attended: string | null;
+          grad_school_grad_date: string | null;
+          job_field: string | null;
+          employer: string | null;
+          job_title: string | null;
+          location: string | null;
+        }>;
+        Relationships: [];
+      };
+      exec_board: {
+        Row: {
+          id: string;
+          name: string;
+          position: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          position: string;
+          created_at?: string;
+        };
+        Update: Partial<{
+          name: string;
+          position: string;
         }>;
         Relationships: [];
       };

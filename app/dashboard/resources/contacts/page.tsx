@@ -8,7 +8,9 @@ export default async function ContactsPage() {
   const supabase = await createClient();
   const { data: contacts } = await supabase
     .from("contacts")
-    .select("id, name, email, phone")
+    .select(
+      "id, name, email, phone, pledge_year, major, undergrad_grad_date, grad_degree, school_attended, grad_school_grad_date, job_field, employer, job_title, location"
+    )
     .order("name");
 
   return (
