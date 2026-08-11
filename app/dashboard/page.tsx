@@ -70,7 +70,7 @@ export default async function DashboardPage() {
 
       <section>
         <h2 className="mb-4 text-xl font-bold tracking-tight text-primary">
-          Boards
+          Project Boards
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {boards?.map((board) => {

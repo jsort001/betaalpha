@@ -22,7 +22,7 @@ export default async function DashboardLayout({
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-4">
           <div className="flex flex-wrap items-center gap-6">
             <Link href="/dashboard" className="text-lg font-bold tracking-tight">
-              Beta Alpha
+              Beta Alpha Project Manager
             </Link>
             <nav className="flex flex-wrap items-center gap-4 text-sm uppercase tracking-wide">
               <Link href="/dashboard" className="hover:underline">
