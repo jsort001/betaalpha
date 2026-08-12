@@ -10,10 +10,15 @@ export default async function AllowlistAdminPage() {
   }
 
   const supabase = await createClient();
-  const { data: entries } = await supabase
-    .from("allowlist")
-    .select("email, name, assigned_role")
-    .order("name");
+  const [{ data: entries }, { data: users }] = await Promise.all([
+    supabase.from("allowlist").select("email, name, assigned_role").order("name"),
+    supabase.from("users").select("email"),
+  ]);
+
+  const signedUpEmails = new Set((users ?? []).map((u) => u.email));
+  const notSignedUpCount = (entries ?? []).filter(
+    (e) => !signedUpEmails.has(e.email)
+  ).length;
 
   return (
     <div className="flex flex-col gap-6">
@@ -25,7 +30,11 @@ export default async function AllowlistAdminPage() {
           Manage who can sign in and what role they get.
         </p>
       </div>
-      <AllowlistManager entries={entries ?? []} />
+      <AllowlistManager
+        entries={entries ?? []}
+        signedUpEmails={[...signedUpEmails]}
+        notSignedUpCount={notSignedUpCount}
+      />
     </div>
   );
 }

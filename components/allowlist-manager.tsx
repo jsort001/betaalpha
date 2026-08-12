@@ -30,12 +30,23 @@ interface AllowlistEntry {
   assigned_role: UserRole;
 }
 
-export function AllowlistManager({ entries }: { entries: AllowlistEntry[] }) {
+export function AllowlistManager({
+  entries,
+  signedUpEmails,
+  notSignedUpCount,
+}: {
+  entries: AllowlistEntry[];
+  signedUpEmails: string[];
+  notSignedUpCount: number;
+}) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState<UserRole>("undergrad");
   const [saving, setSaving] = useState(false);
+  const [sendingNudge, setSendingNudge] = useState(false);
+  const [nudgeResult, setNudgeResult] = useState<string | null>(null);
+  const signedUpSet = new Set(signedUpEmails);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -56,6 +67,23 @@ export function AllowlistManager({ entries }: { entries: AllowlistEntry[] }) {
     const supabase = createClient();
     await supabase.from("allowlist").delete().eq("email", entryEmail);
     router.refresh();
+  }
+
+  async function handleSendNudge() {
+    if (
+      !confirm(
+        `Send a sign-in reminder email to ${notSignedUpCount} member${notSignedUpCount === 1 ? "" : "s"}?`
+      )
+    )
+      return;
+    setSendingNudge(true);
+    setNudgeResult(null);
+    const supabase = createClient();
+    const { data, error } = await supabase.functions.invoke("send-nudge");
+    setSendingNudge(false);
+    setNudgeResult(
+      error ? `Failed to send: ${error.message}` : `Sent ${data.sent} of ${data.total} reminders.`
+    );
   }
 
   return (
@@ -104,6 +132,22 @@ export function AllowlistManager({ entries }: { entries: AllowlistEntry[] }) {
         </Button>
       </form>
 
+      <div className="flex flex-wrap items-center gap-3">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={sendingNudge || notSignedUpCount === 0}
+          onClick={handleSendNudge}
+        >
+          {sendingNudge
+            ? "Sending…"
+            : `Remind everyone not signed up (${notSignedUpCount})`}
+        </Button>
+        {nudgeResult && (
+          <span className="text-sm text-muted-foreground">{nudgeResult}</span>
+        )}
+      </div>
+
       <div className="overflow-x-auto rounded-lg border border-border">
         <Table>
           <TableHeader>
@@ -111,6 +155,7 @@ export function AllowlistManager({ entries }: { entries: AllowlistEntry[] }) {
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -123,6 +168,13 @@ export function AllowlistManager({ entries }: { entries: AllowlistEntry[] }) {
                   <Badge variant="secondary" className="capitalize">
                     {entry.assigned_role}
                   </Badge>
+                </TableCell>
+                <TableCell>
+                  {signedUpSet.has(entry.email) ? (
+                    <Badge variant="secondary">Signed up</Badge>
+                  ) : (
+                    <Badge variant="outline">Not signed up</Badge>
+                  )}
                 </TableCell>
                 <TableCell className="text-right">
                   <Button
@@ -138,7 +190,7 @@ export function AllowlistManager({ entries }: { entries: AllowlistEntry[] }) {
             ))}
             {entries.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center text-muted-foreground">
+                <TableCell colSpan={5} className="text-center text-muted-foreground">
                   No one on the allowlist yet.
                 </TableCell>
               </TableRow>
