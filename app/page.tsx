@@ -46,7 +46,10 @@ export default async function Home() {
         <h1 className="text-3xl font-bold tracking-tight text-primary">
           Beta Alpha Chapter
         </h1>
-        <p className="text-muted-foreground">Task &amp; Duty Management</p>
+        <p className="text-muted-foreground">
+          Task and project management for the Beta Alpha chapter of La
+          Unidad Latina, Lambda Upsilon Lambda Fraternity, Incorporated
+        </p>
       </div>
 
       <Card className="w-full max-w-sm">
