@@ -6,6 +6,7 @@ import { ResourcesNavMenu } from "@/components/resources-nav-menu";
 import { MobileNav } from "@/components/mobile-nav";
 import { Input } from "@/components/ui/input";
 import { BOARD_CATEGORIES } from "@/lib/supabase/types";
+import { cn } from "@/lib/utils";
 
 export default async function DashboardLayout({
   children,
@@ -79,8 +80,17 @@ export default async function DashboardLayout({
                   )}
                 </nav>
                 <div className="flex items-center justify-end gap-3 text-sm">
-                  <span className="text-base">{currentUser.name || currentUser.email}</span>
-                  <span className="rounded-full bg-sidebar-accent px-2 py-0.5 text-xs capitalize text-sidebar-accent-foreground">
+                  <span className="text-lg font-medium">
+                    {currentUser.name || currentUser.email}
+                  </span>
+                  <span
+                    className={cn(
+                      "rounded-full px-2 py-0.5 text-xs font-medium capitalize",
+                      currentUser.role === "alumni"
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                        : "bg-sidebar-accent text-sidebar-accent-foreground"
+                    )}
+                  >
                     {currentUser.role}
                   </span>
                   <SignOutButton />
