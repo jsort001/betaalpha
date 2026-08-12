@@ -61,6 +61,7 @@ export function BoardFormDialog({
   const [nameSelection, setNameSelection] = useState(() =>
     initialNameSelection((initial ?? DEFAULT_VALUES).name)
   );
+  const [year, setYear] = useState(() => new Date().getFullYear());
 
   function selectName(v: string) {
     setNameSelection(v);
@@ -76,8 +77,11 @@ export function BoardFormDialog({
     setSaving(true);
     const supabase = createClient();
 
+    const finalName =
+      nameSelection === CUSTOM_NAME ? values.name : `${values.name} ${year}`;
+
     const payload = {
-      name: values.name,
+      name: finalName,
       description: values.description || null,
       category: values.category === "none" ? null : values.category,
     };
@@ -91,7 +95,7 @@ export function BoardFormDialog({
         .select("id")
         .single();
 
-      const template = BOARD_TASK_TEMPLATES[values.name];
+      const template = BOARD_TASK_TEMPLATES[nameSelection];
       if (newBoard && template) {
         const {
           data: { user },
@@ -137,12 +141,20 @@ export function BoardFormDialog({
                 <SelectItem value={CUSTOM_NAME}>Custom</SelectItem>
               </SelectContent>
             </Select>
-            {nameSelection === CUSTOM_NAME && (
+            {nameSelection === CUSTOM_NAME ? (
               <Input
                 placeholder="Board name"
                 required
                 value={values.name}
                 onChange={(e) => setValues((prev) => ({ ...prev, name: e.target.value }))}
+              />
+            ) : (
+              <Input
+                type="number"
+                placeholder="Year"
+                required
+                value={year}
+                onChange={(e) => setYear(Number(e.target.value))}
               />
             )}
           </div>
