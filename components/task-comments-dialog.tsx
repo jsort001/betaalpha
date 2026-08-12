@@ -131,7 +131,7 @@ export function TaskCommentsDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={trigger} />
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg" onPointerDown={(e) => e.stopPropagation()}>
         <div className="flex max-h-[80vh] flex-col gap-4">
           <DialogHeader>
             <DialogTitle>Comments</DialogTitle>

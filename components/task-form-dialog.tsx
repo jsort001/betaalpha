@@ -133,7 +133,7 @@ export function TaskFormDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={trigger} />
-      <DialogContent>
+      <DialogContent onPointerDown={(e) => e.stopPropagation()}>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <DialogHeader>
             <DialogTitle>{values.id ? "Edit task" : "New task"}</DialogTitle>

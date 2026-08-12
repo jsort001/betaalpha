@@ -101,7 +101,7 @@ export function TaskHistoryDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={trigger} />
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md" onPointerDown={(e) => e.stopPropagation()}>
         <div className="flex max-h-[80vh] flex-col gap-4">
           <DialogHeader>
             <DialogTitle>History</DialogTitle>
