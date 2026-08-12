@@ -219,6 +219,71 @@ Deno.serve(async () => {
     }
   }
 
+  // Comment mentions.
+  const { data: mentions, error: mentionsError } = await supabase
+    .from("comment_mentions")
+    .select("comment_id, user_id")
+    .is("notified_at", null);
+  if (mentionsError) errors.push(`mentions query: ${mentionsError.message}`);
+
+  if (mentions && mentions.length > 0) {
+    const commentIds = [...new Set(mentions.map((m) => m.comment_id))];
+    const { data: comments, error: commentsError } = await supabase
+      .from("task_comments")
+      .select("id, task_id, author_id, body")
+      .in("id", commentIds);
+    if (commentsError) errors.push(`comments query: ${commentsError.message}`);
+    const commentById = new Map((comments ?? []).map((c) => [c.id, c]));
+
+    const taskIds = [...new Set((comments ?? []).map((c) => c.task_id))];
+    const { data: mentionTasks, error: mentionTasksError } = await supabase
+      .from("tasks")
+      .select("id, title, board_id")
+      .in("id", taskIds.length > 0 ? taskIds : ["00000000-0000-0000-0000-000000000000"]);
+    if (mentionTasksError) errors.push(`mention tasks query: ${mentionTasksError.message}`);
+    const taskById = new Map((mentionTasks ?? []).map((t) => [t.id, t]));
+
+    for (const mention of mentions) {
+      const comment = commentById.get(mention.comment_id);
+      const mentionedUser = userById.get(mention.user_id);
+      if (!comment || !mentionedUser) continue;
+      const task = taskById.get(comment.task_id);
+      if (!task) continue;
+      const author = userById.get(comment.author_id);
+      const authorName = author?.name ?? "Someone";
+      const preview =
+        comment.body.length > 200 ? `${comment.body.slice(0, 200)}…` : comment.body;
+      const boardName = boardNameById.get(task.board_id) ?? "a board";
+
+      const ok = await sendEmail(
+        mentionedUser.email,
+        `${authorName} tagged you in a comment: ${task.title}`,
+        `
+          <p>${authorName} tagged you in a comment on <strong>${task.title}</strong> (${boardName}):</p>
+          <p style="border-left: 3px solid #ccc; padding-left: 10px;">${preview}</p>
+          <p><a href="${APP_URL}/dashboard/boards/${task.board_id}">View it in Beta Alpha Project Manager</a></p>
+        `
+      );
+      if (ok) {
+        await postToSlack(
+          `💬 ${authorName} tagged *${mentionedUser.name}* in a comment on *${task.title}* (${boardName}):\n` +
+            `> ${preview}\n` +
+            `<${APP_URL}/dashboard/boards/${task.board_id}|View in Beta Alpha Project Manager>`
+        );
+        const { error: updateError } = await supabase
+          .from("comment_mentions")
+          .update({ notified_at: new Date().toISOString() })
+          .eq("comment_id", mention.comment_id)
+          .eq("user_id", mention.user_id);
+        if (updateError) {
+          errors.push(`mention update ${mention.comment_id}/${mention.user_id}: ${updateError.message}`);
+        } else {
+          sentCount++;
+        }
+      }
+    }
+  }
+
   return new Response(JSON.stringify({ sent: sentCount, errors }), {
     headers: { "Content-Type": "application/json" },
   });
