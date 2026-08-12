@@ -30,29 +30,20 @@ export function BoardCardGrid({
       {boards.map((board) => {
         const stats = boardStats.get(board.id) ?? { open: 0, overdue: 0 };
         return (
-          <div key={board.id} className="relative">
-            <Link href={`/dashboard/boards/${board.id}`}>
-              <Card className="h-full transition-colors hover:border-primary">
-                <CardHeader>
-                  <CardTitle className="pr-16 text-base">{board.name}</CardTitle>
-                  {board.category && (
-                    <Badge variant="secondary" className="w-fit">
-                      {board.category}
-                    </Badge>
-                  )}
-                </CardHeader>
-                <CardContent className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <span>{stats.open} open</span>
-                  {stats.overdue > 0 && (
-                    <span className="font-medium text-destructive">
-                      {stats.overdue} overdue
-                    </span>
-                  )}
-                </CardContent>
-              </Card>
-            </Link>
-            {isAlumni && (
-              <div className="absolute right-3 top-3">
+          <Card key={board.id} className="h-full transition-colors hover:border-primary">
+            <CardHeader className="flex flex-row items-start justify-between gap-2">
+              <Link
+                href={`/dashboard/boards/${board.id}`}
+                className="flex flex-col gap-1 hover:underline"
+              >
+                <CardTitle className="text-base">{board.name}</CardTitle>
+                {board.category && (
+                  <Badge variant="secondary" className="w-fit">
+                    {board.category}
+                  </Badge>
+                )}
+              </Link>
+              {isAlumni && (
                 <BoardFormDialog
                   trigger={
                     <Button variant="outline" size="sm">
@@ -66,9 +57,19 @@ export function BoardCardGrid({
                     category: board.category ?? "none",
                   }}
                 />
-              </div>
-            )}
-          </div>
+              )}
+            </CardHeader>
+            <Link href={`/dashboard/boards/${board.id}`}>
+              <CardContent className="flex items-center gap-3 text-sm text-muted-foreground">
+                <span>{stats.open} open</span>
+                {stats.overdue > 0 && (
+                  <span className="font-medium text-destructive">
+                    {stats.overdue} overdue
+                  </span>
+                )}
+              </CardContent>
+            </Link>
+          </Card>
         );
       })}
     </div>
