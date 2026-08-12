@@ -36,8 +36,12 @@ export interface BoardFormValues {
   category: BoardCategory | "none";
 }
 
-const DEFAULT_VALUES: BoardFormValues = { name: "", description: "", category: "none" };
 const CUSTOM_NAME = "custom";
+const DEFAULT_VALUES: BoardFormValues = {
+  name: RECURRING_BOARD_TITLES[0],
+  description: "",
+  category: "Intake",
+};
 
 function initialNameSelection(name: string): string {
   return (RECURRING_BOARD_TITLES as readonly string[]).includes(name) ? name : CUSTOM_NAME;
@@ -60,7 +64,11 @@ export function BoardFormDialog({
 
   function selectName(v: string) {
     setNameSelection(v);
-    setValues((prev) => ({ ...prev, name: v === CUSTOM_NAME ? "" : v }));
+    setValues((prev) => ({
+      ...prev,
+      name: v === CUSTOM_NAME ? "" : v,
+      category: v === CUSTOM_NAME ? prev.category : "Intake",
+    }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
