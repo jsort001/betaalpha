@@ -56,7 +56,7 @@ export default async function DashboardLayout({
                 />
               </form>
               <div className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-center md:justify-between">
-                <nav className="flex flex-col gap-4 font-heading text-sm uppercase tracking-wide md:flex-row md:flex-wrap md:items-center">
+                <nav className="flex flex-col gap-4 font-heading text-base uppercase tracking-wide md:flex-row md:flex-wrap md:items-center">
                   <Link href="/dashboard" className="hover:underline">
                     My Tasks
                   </Link>
@@ -85,7 +85,7 @@ export default async function DashboardLayout({
                   </span>
                   <span
                     className={cn(
-                      "rounded-full px-2 py-0.5 text-xs font-medium capitalize",
+                      "rounded-full px-2.5 py-1 text-sm font-medium capitalize",
                       currentUser.role === "alumni"
                         ? "bg-sidebar-primary text-sidebar-primary-foreground"
                         : "bg-sidebar-accent text-sidebar-accent-foreground"
@@ -93,7 +93,7 @@ export default async function DashboardLayout({
                   >
                     {currentUser.role}
                   </span>
-                  <SignOutButton />
+                  <SignOutButton className="text-base" />
                 </div>
               </div>
             </div>
