@@ -54,6 +54,31 @@ const PRIORITY_BORDER: Record<string, string> = {
   low: "border-l-4 border-l-border",
 };
 
+function TaskCardInfo({ task }: { task: TaskRow }) {
+  return (
+    <div
+      className="flex cursor-pointer flex-col gap-2"
+      onPointerDown={(e) => e.stopPropagation()}
+    >
+      <p className="text-sm font-medium">{task.title}</p>
+      {task.description && (
+        <p className="line-clamp-2 text-xs text-muted-foreground">
+          {task.description}
+        </p>
+      )}
+      <p className="text-xs text-muted-foreground">
+        {task.owner_name ?? "Unassigned"}
+      </p>
+      <div className="flex flex-wrap items-center gap-2">
+        <DueDateBadge dueDate={task.due_date} done={task.status === "done"} />
+        <Badge variant="outline" className="capitalize">
+          {task.priority}
+        </Badge>
+      </div>
+    </div>
+  );
+}
+
 function TaskCard({
   task,
   boardId,
@@ -92,16 +117,31 @@ function TaskCard({
       {...(draggable ? { ...attributes, ...listeners } : {})}
     >
       <CardContent className="flex flex-col gap-2 py-3">
-        <p className="text-sm font-medium">{task.title}</p>
-        <p className="text-xs text-muted-foreground">
-          {task.owner_name ?? "Unassigned"}
-        </p>
-        <div className="flex flex-wrap items-center gap-2">
-          <DueDateBadge dueDate={task.due_date} done={task.status === "done"} />
-          <Badge variant="outline" className="capitalize">
-            {task.priority}
-          </Badge>
-        </div>
+        {isAlumni ? (
+          <TaskFormDialog
+            boards={boards}
+            defaultBoardId={boardId}
+            members={members}
+            trigger={<TaskCardInfo task={task} />}
+            initial={{
+              id: task.id,
+              board_id: boardId,
+              title: task.title,
+              description: task.description ?? "",
+              owner_id: task.owner_id,
+              due_date: task.due_date ?? "",
+              status: task.status,
+              priority: task.priority,
+              recurrence_rule: task.recurrence_rule ?? "none",
+            }}
+          />
+        ) : (
+          <TaskCommentsDialog
+            taskId={task.id}
+            members={members}
+            trigger={<TaskCardInfo task={task} />}
+          />
+        )}
         <div className="flex items-center justify-between gap-2 pt-1">
           <TaskCommentsDialog
             taskId={task.id}
