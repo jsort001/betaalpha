@@ -3,6 +3,7 @@ import Image from "next/image";
 import { requireCurrentUser } from "@/lib/current-user";
 import { SignOutButton } from "@/components/sign-out-button";
 import { ResourcesNavMenu } from "@/components/resources-nav-menu";
+import { Input } from "@/components/ui/input";
 import { BOARD_CATEGORIES } from "@/lib/supabase/types";
 
 export default async function DashboardLayout({
@@ -57,6 +58,14 @@ export default async function DashboardLayout({
               )}
             </nav>
             <div className="flex items-center gap-3 text-sm">
+              <form action="/dashboard/search" method="GET">
+                <Input
+                  type="search"
+                  name="q"
+                  placeholder="Search tasks…"
+                  className="h-8 w-40 bg-background text-foreground"
+                />
+              </form>
               <span>{currentUser.name || currentUser.email}</span>
               <span className="rounded-full bg-sidebar-accent px-2 py-0.5 text-xs capitalize text-sidebar-accent-foreground">
                 {currentUser.role}

@@ -245,6 +245,36 @@ export interface Database {
         Update: never;
         Relationships: [];
       };
+      events: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          location: string | null;
+          start_date: string;
+          end_date: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          description?: string | null;
+          location?: string | null;
+          start_date: string;
+          end_date?: string | null;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<{
+          title: string;
+          description: string | null;
+          location: string | null;
+          start_date: string;
+          end_date: string | null;
+        }>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

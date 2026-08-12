@@ -15,6 +15,7 @@ import { STATUS_LABELS } from "@/components/status-badge";
 import { DueDateBadge } from "@/components/due-date-badge";
 import { TaskFormDialog } from "@/components/task-form-dialog";
 import { TaskCommentsDialog } from "@/components/task-comments-dialog";
+import { TaskHistoryDialog } from "@/components/task-history-dialog";
 import type { RecurrenceRule, TaskStatus } from "@/lib/supabase/types";
 
 interface Member {
@@ -91,6 +92,15 @@ export function MyTaskList({
                 trigger={
                   <Button variant="outline" size="sm">
                     Comments{task.commentCount > 0 ? ` (${task.commentCount})` : ""}
+                  </Button>
+                }
+              />
+              <TaskHistoryDialog
+                taskId={task.id}
+                members={members}
+                trigger={
+                  <Button variant="outline" size="sm">
+                    History
                   </Button>
                 }
               />

@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { DueDateBadge } from "@/components/due-date-badge";
 import { TaskFormDialog } from "@/components/task-form-dialog";
 import { TaskCommentsDialog } from "@/components/task-comments-dialog";
+import { TaskHistoryDialog } from "@/components/task-history-dialog";
 import { STATUS_LABELS } from "@/components/status-badge";
 import type { TaskStatus } from "@/lib/supabase/types";
 
@@ -108,6 +109,15 @@ function TaskCard({
             trigger={
               <Button variant="outline" size="xs" onPointerDown={(e) => e.stopPropagation()}>
                 {task.commentCount > 0 ? task.commentCount : "Comment"}
+              </Button>
+            }
+          />
+          <TaskHistoryDialog
+            taskId={task.id}
+            members={members}
+            trigger={
+              <Button variant="outline" size="xs" onPointerDown={(e) => e.stopPropagation()}>
+                History
               </Button>
             }
           />

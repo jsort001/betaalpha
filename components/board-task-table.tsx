@@ -23,6 +23,7 @@ import { StatusBadge, STATUS_LABELS } from "@/components/status-badge";
 import { DueDateBadge } from "@/components/due-date-badge";
 import { TaskFormDialog } from "@/components/task-form-dialog";
 import { TaskCommentsDialog } from "@/components/task-comments-dialog";
+import { TaskHistoryDialog } from "@/components/task-history-dialog";
 import type { TaskStatus } from "@/lib/supabase/types";
 
 interface Member {
@@ -108,6 +109,7 @@ export function BoardTaskTable({
               <TableHead>Status</TableHead>
               <TableHead>Priority</TableHead>
               <TableHead>Comments</TableHead>
+              <TableHead>History</TableHead>
               {isAlumni && <TableHead className="text-right">Actions</TableHead>}
             </TableRow>
           </TableHeader>
@@ -164,6 +166,17 @@ export function BoardTaskTable({
                       trigger={
                         <Button variant="outline" size="sm">
                           {task.commentCount > 0 ? task.commentCount : "Comment"}
+                        </Button>
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <TaskHistoryDialog
+                      taskId={task.id}
+                      members={members}
+                      trigger={
+                        <Button variant="outline" size="sm">
+                          History
                         </Button>
                       }
                     />
@@ -228,7 +241,7 @@ export function BoardTaskTable({
             })}
             {visibleTasks.length === 0 && (
               <TableRow>
-                <TableCell colSpan={isAlumni ? 7 : 6} className="text-center text-muted-foreground">
+                <TableCell colSpan={isAlumni ? 8 : 7} className="text-center text-muted-foreground">
                   {tasks.length === 0
                     ? "No tasks on this board yet."
                     : 'All tasks are done. Click "Show completed" above to see them.'}
