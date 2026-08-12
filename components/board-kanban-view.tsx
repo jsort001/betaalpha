@@ -111,6 +111,7 @@ function TaskCard({
   isAlumni: boolean;
   draggable: boolean;
 }) {
+  const router = useRouter();
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
     disabled: !draggable,
@@ -122,6 +123,13 @@ function TaskCard({
         zIndex: isDragging ? 10 : undefined,
       }
     : undefined;
+
+  async function handleDelete() {
+    if (!confirm("Delete this task?")) return;
+    const supabase = createClient();
+    await supabase.from("tasks").delete().eq("id", task.id);
+    router.refresh();
+  }
 
   return (
     <Card
@@ -161,7 +169,7 @@ function TaskCard({
             trigger={<TaskCardInfo task={task} />}
           />
         )}
-        <div className="flex items-center justify-between gap-2 pt-1">
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
           <TaskCommentsDialog
             taskId={task.id}
             members={members}
@@ -204,6 +212,17 @@ function TaskCard({
                 recurrence_rule: task.recurrence_rule ?? "none",
               }}
             />
+          )}
+          {isAlumni && (
+            <Button
+              variant="ghost"
+              size="xs"
+              className="text-destructive"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={handleDelete}
+            >
+              Delete
+            </Button>
           )}
         </div>
       </CardContent>
