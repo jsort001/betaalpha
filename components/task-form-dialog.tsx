@@ -264,10 +264,10 @@ export function TaskFormDialog({
                   <SelectValue>{(v: TaskStatus) => STATUS_LABELS[v]}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="not_started">Not started</SelectItem>
-                  <SelectItem value="in_progress">In progress</SelectItem>
-                  <SelectItem value="done">Done</SelectItem>
-                  <SelectItem value="blocked">Blocked</SelectItem>
+                  <SelectItem value="not_started">{STATUS_LABELS.not_started}</SelectItem>
+                  <SelectItem value="in_progress">{STATUS_LABELS.in_progress}</SelectItem>
+                  <SelectItem value="done">{STATUS_LABELS.done}</SelectItem>
+                  <SelectItem value="blocked">{STATUS_LABELS.blocked}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
