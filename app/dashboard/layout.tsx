@@ -21,7 +21,7 @@ export default async function DashboardLayout({
         <div className="mx-auto max-w-6xl px-6 py-4">
           <MobileNav
             brand={
-              <div className="flex min-w-0 flex-1 items-center justify-between gap-4">
+              <div className="flex min-w-0 flex-1 flex-wrap items-center justify-between gap-4">
                 <Link href="/dashboard" className="flex items-center gap-3">
                   <Image
                     src="/logo.png"
@@ -56,7 +56,7 @@ export default async function DashboardLayout({
                 />
               </form>
               <div className="flex flex-col gap-4 md:flex-row md:flex-wrap md:items-center md:justify-between">
-                <nav className="flex flex-col gap-4 font-heading text-base uppercase tracking-wide md:flex-row md:flex-wrap md:items-center">
+                <nav className="flex flex-col gap-4 font-heading text-sm uppercase tracking-wide md:flex-row md:flex-wrap md:items-center">
                   <Link href="/dashboard" className="hover:underline">
                     My Tasks
                   </Link>
@@ -80,12 +80,12 @@ export default async function DashboardLayout({
                   )}
                 </nav>
                 <div className="flex items-center justify-end gap-3 text-sm">
-                  <span className="text-lg font-medium">
+                  <span className="text-base font-medium">
                     {currentUser.name || currentUser.email}
                   </span>
                   <span
                     className={cn(
-                      "rounded-full px-2.5 py-1 text-sm font-medium capitalize",
+                      "rounded-full px-2 py-0.5 text-xs font-medium capitalize",
                       currentUser.role === "alumni"
                         ? "bg-sidebar-primary text-sidebar-primary-foreground"
                         : "bg-sidebar-accent text-sidebar-accent-foreground"
@@ -93,7 +93,7 @@ export default async function DashboardLayout({
                   >
                     {currentUser.role}
                   </span>
-                  <SignOutButton className="text-base" />
+                  <SignOutButton />
                 </div>
               </div>
             </div>
