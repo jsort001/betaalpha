@@ -68,6 +68,28 @@ function summarize(row: HistoryRow, nameById: Map<string, string>): string {
   return `${who} updated this task`;
 }
 
+function completionDuration(rows: HistoryRow[]): string | null {
+  const created = rows.find((r) => r.change_type === "created");
+  if (!created) return null;
+
+  const completed = rows.find((r) => {
+    if (r.change_type !== "status_changed") return false;
+    const details = r.details as { new?: Record<string, unknown> } | null;
+    return details?.new?.status === "done";
+  });
+  if (!completed) return null;
+
+  const ms =
+    new Date(completed.created_at).getTime() - new Date(created.created_at).getTime();
+  const hours = ms / (1000 * 60 * 60);
+  if (hours < 24) {
+    const rounded = Math.max(1, Math.round(hours));
+    return `Completed in ${rounded} hour${rounded === 1 ? "" : "s"}`;
+  }
+  const days = Math.round(hours / 24);
+  return `Completed in ${days} day${days === 1 ? "" : "s"}`;
+}
+
 export function TaskHistoryDialog({
   taskId,
   members,
@@ -82,6 +104,7 @@ export function TaskHistoryDialog({
   const [rows, setRows] = useState<HistoryRow[]>([]);
 
   const nameById = new Map(members.map((m) => [m.id, m.name]));
+  const duration = completionDuration(rows);
 
   useEffect(() => {
     if (!open) return;
@@ -106,6 +129,9 @@ export function TaskHistoryDialog({
           <DialogHeader>
             <DialogTitle>History</DialogTitle>
           </DialogHeader>
+          {!loading && duration && (
+            <p className="text-sm font-medium text-foreground">{duration}</p>
+          )}
           <div className="flex flex-col gap-3 overflow-y-auto">
             {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
             {!loading && rows.length === 0 && (
