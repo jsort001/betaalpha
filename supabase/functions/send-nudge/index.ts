@@ -34,6 +34,41 @@ async function sendEmail(to: string, subject: string, html: string) {
   return res.ok;
 }
 
+function nudgeEmailHtml(name: string) {
+  return `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f0e8;padding:32px 0;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;font-family:Helvetica,Arial,sans-serif;">
+            <tr>
+              <td align="center" style="padding:32px 32px 16px;">
+                <img src="${APP_URL}/logo.png" alt="Beta Alpha crest" width="72" style="display:block;" />
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="padding:0 32px 24px;">
+                <h1 style="margin:0;font-size:20px;color:#653819;">Beta Alpha Chapter</h1>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:0 32px 32px;font-size:15px;line-height:1.6;color:#333333;">
+                <p style="margin:0 0 16px;">Hi ${name},</p>
+                <p style="margin:0 0 24px;">You've been added to Beta Alpha Project Manager but haven't signed in yet. Sign in with the Google account an admin added for you to see your tasks.</p>
+                <p style="margin:0;">
+                  <a href="${APP_URL}" style="display:inline-block;background-color:#653819;color:#ffffff;font-weight:bold;text-decoration:none;padding:12px 24px;border-radius:6px;">Sign in to Beta Alpha Project Manager</a>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="height:4px;background-color:#EEAA00;font-size:0;line-height:0;">&nbsp;</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  `;
+}
+
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
@@ -66,57 +101,28 @@ Deno.serve(async (req) => {
     .single();
   if (callerRow?.role !== "alumni") return json({ error: "Forbidden" }, 403);
 
-  const [{ data: allowlist, error: allowlistError }, { data: users, error: usersError }] =
-    await Promise.all([
-      supabase.from("allowlist").select("email, name"),
-      supabase.from("users").select("email"),
-    ]);
-  if (allowlistError) return json({ error: allowlistError.message }, 500);
-  if (usersError) return json({ error: usersError.message }, 500);
-
-  const signedUpEmails = new Set((users ?? []).map((u) => u.email));
-  const notSignedUp = (allowlist ?? []).filter((a) => !signedUpEmails.has(a.email));
-
-  let sentCount = 0;
-  for (const person of notSignedUp) {
-    const ok = await sendEmail(
-      person.email,
-      "Reminder: sign in to Beta Alpha Project Manager",
-      `
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f5f0e8;padding:32px 0;">
-          <tr>
-            <td align="center">
-              <table role="presentation" width="480" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:8px;overflow:hidden;font-family:Helvetica,Arial,sans-serif;">
-                <tr>
-                  <td align="center" style="padding:32px 32px 16px;">
-                    <img src="${APP_URL}/logo.png" alt="Beta Alpha crest" width="72" style="display:block;" />
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center" style="padding:0 32px 24px;">
-                    <h1 style="margin:0;font-size:20px;color:#653819;">Beta Alpha Chapter</h1>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="padding:0 32px 32px;font-size:15px;line-height:1.6;color:#333333;">
-                    <p style="margin:0 0 16px;">Hi ${person.name},</p>
-                    <p style="margin:0 0 24px;">You've been added to Beta Alpha Project Manager but haven't signed in yet. Sign in with the Google account an admin added for you to see your tasks.</p>
-                    <p style="margin:0;">
-                      <a href="${APP_URL}" style="display:inline-block;background-color:#653819;color:#ffffff;font-weight:bold;text-decoration:none;padding:12px 24px;border-radius:6px;">Sign in to Beta Alpha Project Manager</a>
-                    </p>
-                  </td>
-                </tr>
-                <tr>
-                  <td style="height:4px;background-color:#EEAA00;font-size:0;line-height:0;">&nbsp;</td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-        </table>
-      `
-    );
-    if (ok) sentCount++;
+  let targetEmail: string | undefined;
+  try {
+    const body = await req.json();
+    targetEmail = body?.email;
+  } catch {
+    // no/invalid JSON body
   }
+  if (!targetEmail) return json({ error: "email is required" }, 400);
 
-  return json({ sent: sentCount, total: notSignedUp.length });
+  const [{ data: allowlistEntry }, { data: existingUser }] = await Promise.all([
+    supabase.from("allowlist").select("email, name").eq("email", targetEmail).maybeSingle(),
+    supabase.from("users").select("id").eq("email", targetEmail).maybeSingle(),
+  ]);
+  if (!allowlistEntry) return json({ error: "That email isn't on the allowlist" }, 404);
+  if (existingUser) return json({ error: "That person has already signed up" }, 400);
+
+  const ok = await sendEmail(
+    allowlistEntry.email,
+    "Reminder: sign in to Beta Alpha Project Manager",
+    nudgeEmailHtml(allowlistEntry.name)
+  );
+  if (!ok) return json({ error: "Failed to send email" }, 502);
+
+  return json({ sent: true });
 });

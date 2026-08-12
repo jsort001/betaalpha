@@ -16,9 +16,6 @@ export default async function AllowlistAdminPage() {
   ]);
 
   const signedUpEmails = new Set((users ?? []).map((u) => u.email));
-  const notSignedUpCount = (entries ?? []).filter(
-    (e) => !signedUpEmails.has(e.email)
-  ).length;
 
   return (
     <div className="flex flex-col gap-6">
@@ -33,7 +30,6 @@ export default async function AllowlistAdminPage() {
       <AllowlistManager
         entries={entries ?? []}
         signedUpEmails={[...signedUpEmails]}
-        notSignedUpCount={notSignedUpCount}
       />
     </div>
   );

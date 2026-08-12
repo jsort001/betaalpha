@@ -33,19 +33,17 @@ interface AllowlistEntry {
 export function AllowlistManager({
   entries,
   signedUpEmails,
-  notSignedUpCount,
 }: {
   entries: AllowlistEntry[];
   signedUpEmails: string[];
-  notSignedUpCount: number;
 }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState<UserRole>("undergrad");
   const [saving, setSaving] = useState(false);
-  const [sendingNudge, setSendingNudge] = useState(false);
-  const [nudgeResult, setNudgeResult] = useState<string | null>(null);
+  const [sendingNudgeTo, setSendingNudgeTo] = useState<string | null>(null);
+  const [nudgeResults, setNudgeResults] = useState<Record<string, string>>({});
   const [statusSortDir, setStatusSortDir] = useState<"asc" | "desc" | null>(null);
   const signedUpSet = new Set(signedUpEmails);
 
@@ -87,21 +85,18 @@ export function AllowlistManager({
     router.refresh();
   }
 
-  async function handleSendNudge() {
-    if (
-      !confirm(
-        `Send a sign-in reminder email to ${notSignedUpCount} member${notSignedUpCount === 1 ? "" : "s"}?`
-      )
-    )
-      return;
-    setSendingNudge(true);
-    setNudgeResult(null);
+  async function handleSendNudge(entryEmail: string) {
+    if (!confirm(`Send a sign-in reminder to ${entryEmail}?`)) return;
+    setSendingNudgeTo(entryEmail);
     const supabase = createClient();
-    const { data, error } = await supabase.functions.invoke("send-nudge");
-    setSendingNudge(false);
-    setNudgeResult(
-      error ? `Failed to send: ${error.message}` : `Sent ${data.sent} of ${data.total} reminders.`
-    );
+    const { error } = await supabase.functions.invoke("send-nudge", {
+      body: { email: entryEmail },
+    });
+    setSendingNudgeTo(null);
+    setNudgeResults((prev) => ({
+      ...prev,
+      [entryEmail]: error ? `Failed: ${error.message}` : "Reminder sent",
+    }));
   }
 
   return (
@@ -150,22 +145,6 @@ export function AllowlistManager({
         </Button>
       </form>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={sendingNudge || notSignedUpCount === 0}
-          onClick={handleSendNudge}
-        >
-          {sendingNudge
-            ? "Sending…"
-            : `Remind everyone not signed up (${notSignedUpCount})`}
-        </Button>
-        {nudgeResult && (
-          <span className="text-sm text-muted-foreground">{nudgeResult}</span>
-        )}
-      </div>
-
       <div className="overflow-x-auto rounded-lg border border-border">
         <Table>
           <TableHeader>
@@ -205,14 +184,31 @@ export function AllowlistManager({
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-destructive"
-                    onClick={() => handleRemove(entry.email)}
-                  >
-                    Remove
-                  </Button>
+                  <div className="flex items-center justify-end gap-2">
+                    {nudgeResults[entry.email] && (
+                      <span className="text-xs text-muted-foreground">
+                        {nudgeResults[entry.email]}
+                      </span>
+                    )}
+                    {!signedUpSet.has(entry.email) && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={sendingNudgeTo === entry.email}
+                        onClick={() => handleSendNudge(entry.email)}
+                      >
+                        {sendingNudgeTo === entry.email ? "Sending…" : "Remind"}
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive"
+                      onClick={() => handleRemove(entry.email)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
