@@ -3,6 +3,7 @@ import Image from "next/image";
 import { requireCurrentUser } from "@/lib/current-user";
 import { SignOutButton } from "@/components/sign-out-button";
 import { ResourcesNavMenu } from "@/components/resources-nav-menu";
+import { MobileNav } from "@/components/mobile-nav";
 import { Input } from "@/components/ui/input";
 import { BOARD_CATEGORIES } from "@/lib/supabase/types";
 
@@ -17,62 +18,66 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-sidebar text-sidebar-foreground">
         <div className="mx-auto max-w-6xl px-6 py-4">
-          <Link
-            href="/dashboard"
-            className="flex items-center justify-center gap-3"
-          >
-            <Image
-              src="/logo.png"
-              alt="Beta Alpha crest"
-              width={40}
-              height={45}
-              className="h-10 w-auto"
-              priority
-            />
-            <span className="font-heading text-lg font-bold uppercase tracking-wide">
-              Beta Alpha Project Manager
-            </span>
-          </Link>
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
-            <nav className="flex flex-wrap items-center gap-4 font-heading text-sm uppercase tracking-wide">
-              <Link href="/dashboard" className="hover:underline">
-                My Tasks
-              </Link>
-              <Link href="/dashboard/calendar" className="hover:underline">
-                Calendar
-              </Link>
-              {BOARD_CATEGORIES.map((category) => (
-                <Link
-                  key={category}
-                  href={`/dashboard/categories/${encodeURIComponent(category)}`}
-                  className="hover:underline"
-                >
-                  {category}
-                </Link>
-              ))}
-              <ResourcesNavMenu />
-              {currentUser.role === "alumni" && (
-                <Link href="/dashboard/admin/allowlist" className="hover:underline">
-                  Admin
-                </Link>
-              )}
-            </nav>
-            <div className="flex items-center gap-3 text-sm">
-              <form action="/dashboard/search" method="GET">
-                <Input
-                  type="search"
-                  name="q"
-                  placeholder="Search tasks…"
-                  className="h-8 w-40 bg-background text-foreground"
+          <MobileNav
+            brand={
+              <Link href="/dashboard" className="flex items-center gap-3">
+                <Image
+                  src="/logo.png"
+                  alt="Beta Alpha crest"
+                  width={40}
+                  height={45}
+                  className="h-10 w-auto"
+                  priority
                 />
-              </form>
-              <span>{currentUser.name || currentUser.email}</span>
-              <span className="rounded-full bg-sidebar-accent px-2 py-0.5 text-xs capitalize text-sidebar-accent-foreground">
-                {currentUser.role}
-              </span>
-              <SignOutButton />
+                <span className="font-heading text-lg font-bold uppercase tracking-wide">
+                  Beta Alpha Project Manager
+                </span>
+              </Link>
+            }
+          >
+            <div className="mt-4 flex flex-col gap-4 md:flex-row md:flex-wrap md:items-center md:justify-between">
+              <nav className="flex flex-col gap-4 font-heading text-sm uppercase tracking-wide md:flex-row md:flex-wrap md:items-center">
+                <Link href="/dashboard" className="hover:underline">
+                  My Tasks
+                </Link>
+                <Link href="/dashboard/calendar" className="hover:underline">
+                  Calendar
+                </Link>
+                {BOARD_CATEGORIES.map((category) => (
+                  <Link
+                    key={category}
+                    href={`/dashboard/categories/${encodeURIComponent(category)}`}
+                    className="hover:underline"
+                  >
+                    {category}
+                  </Link>
+                ))}
+                <ResourcesNavMenu />
+                {currentUser.role === "alumni" && (
+                  <Link href="/dashboard/admin/allowlist" className="hover:underline">
+                    Admin
+                  </Link>
+                )}
+              </nav>
+              <div className="flex flex-col gap-3 text-sm md:flex-row md:items-center">
+                <form action="/dashboard/search" method="GET">
+                  <Input
+                    type="search"
+                    name="q"
+                    placeholder="Search tasks…"
+                    className="h-8 w-full bg-background text-foreground md:w-40"
+                  />
+                </form>
+                <div className="flex items-center gap-3">
+                  <span>{currentUser.name || currentUser.email}</span>
+                  <span className="rounded-full bg-sidebar-accent px-2 py-0.5 text-xs capitalize text-sidebar-accent-foreground">
+                    {currentUser.role}
+                  </span>
+                  <SignOutButton />
+                </div>
+              </div>
             </div>
-          </div>
+          </MobileNav>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>

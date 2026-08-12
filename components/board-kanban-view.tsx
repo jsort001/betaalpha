@@ -254,7 +254,7 @@ function Column({
   return (
     <div
       ref={setNodeRef}
-      className={`flex min-h-[200px] flex-col gap-2 rounded-lg border border-border bg-muted/30 p-3 ${
+      className={`flex min-h-[200px] w-72 shrink-0 flex-col gap-2 rounded-lg border border-border bg-muted/30 p-3 sm:w-auto sm:shrink ${
         isOver ? "border-primary bg-muted/60" : ""
       }`}
     >
@@ -319,7 +319,7 @@ export function BoardKanbanView({
 
   return (
     <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="flex gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-4">
         {COLUMNS.map((status) => (
           <Column
             key={status}
