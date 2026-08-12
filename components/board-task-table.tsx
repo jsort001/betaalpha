@@ -86,8 +86,8 @@ export function BoardTaskTable({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-end gap-2">
-        {completedCount > 0 && (
+      {completedCount > 0 && (
+        <div className="flex justify-end">
           <Button
             variant="outline"
             size="sm"
@@ -95,16 +95,8 @@ export function BoardTaskTable({
           >
             {showCompleted ? "Hide completed" : `Show completed (${completedCount})`}
           </Button>
-        )}
-        {isAlumni && (
-          <TaskFormDialog
-            boards={boards}
-            defaultBoardId={boardId}
-            members={members}
-            trigger={<Button>New task</Button>}
-          />
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="overflow-x-auto rounded-lg border border-border">
         <Table>

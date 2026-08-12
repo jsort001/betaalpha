@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { BoardTaskTable } from "@/components/board-task-table";
 import { BoardKanbanView } from "@/components/board-kanban-view";
+import { TaskFormDialog } from "@/components/task-form-dialog";
 import type { TaskStatus } from "@/lib/supabase/types";
 
 interface Member {
@@ -62,7 +63,7 @@ export function BoardView({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-2">
         <div className="inline-flex rounded-lg border border-border p-0.5">
           <Button
             variant={view === "list" ? "default" : "ghost"}
@@ -79,6 +80,14 @@ export function BoardView({
             Board
           </Button>
         </div>
+        {isAlumni && (
+          <TaskFormDialog
+            boards={boards}
+            defaultBoardId={boardId}
+            members={members}
+            trigger={<Button size="sm">New task</Button>}
+          />
+        )}
       </div>
 
       {view === "list" ? (
