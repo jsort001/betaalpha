@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,25 @@ export function AllowlistManager({
   const [saving, setSaving] = useState(false);
   const [sendingNudge, setSendingNudge] = useState(false);
   const [nudgeResult, setNudgeResult] = useState<string | null>(null);
+  const [statusSortDir, setStatusSortDir] = useState<"asc" | "desc" | null>(null);
   const signedUpSet = new Set(signedUpEmails);
+
+  function toggleStatusSort() {
+    setStatusSortDir((prev) =>
+      prev === null ? "asc" : prev === "asc" ? "desc" : null
+    );
+  }
+
+  const sortedEntries = useMemo(() => {
+    if (!statusSortDir) return entries;
+    const sorted = [...entries].sort((a, b) => {
+      const aSignedUp = signedUpSet.has(a.email) ? 1 : 0;
+      const bSignedUp = signedUpSet.has(b.email) ? 1 : 0;
+      return aSignedUp - bSignedUp;
+    });
+    return statusSortDir === "asc" ? sorted : sorted.reverse();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entries, statusSortDir, signedUpEmails]);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -155,12 +173,22 @@ export function AllowlistManager({
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>
+                <button
+                  type="button"
+                  onClick={toggleStatusSort}
+                  className="hover:text-foreground"
+                >
+                  Status
+                  {statusSortDir === "asc" && " ▲"}
+                  {statusSortDir === "desc" && " ▼"}
+                </button>
+              </TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {entries.map((entry) => (
+            {sortedEntries.map((entry) => (
               <TableRow key={entry.email}>
                 <TableCell className="font-medium">{entry.name}</TableCell>
                 <TableCell className="text-muted-foreground">{entry.email}</TableCell>
@@ -188,7 +216,7 @@ export function AllowlistManager({
                 </TableCell>
               </TableRow>
             ))}
-            {entries.length === 0 && (
+            {sortedEntries.length === 0 && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center text-muted-foreground">
                   No one on the allowlist yet.
