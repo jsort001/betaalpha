@@ -63,7 +63,7 @@ export function CalendarGrid({
   isAlumni: boolean;
 }) {
   const today = new Date();
-  const [mode, setMode] = useState<"grid" | "agenda">("grid");
+  const [mode, setMode] = useState<"grid" | "agenda">("agenda");
   const [cursor, setCursor] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
   const [showPast, setShowPast] = useState(false);
 
