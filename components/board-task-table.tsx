@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import {
@@ -63,6 +64,12 @@ export function BoardTaskTable({
   isAlumni: boolean;
 }) {
   const router = useRouter();
+  const [showCompleted, setShowCompleted] = useState(false);
+
+  const completedCount = tasks.filter((t) => t.status === "done").length;
+  const visibleTasks = showCompleted
+    ? tasks
+    : tasks.filter((t) => t.status !== "done");
 
   async function updateStatus(taskId: string, status: TaskStatus) {
     const supabase = createClient();
@@ -79,16 +86,25 @@ export function BoardTaskTable({
 
   return (
     <div className="flex flex-col gap-4">
-      {isAlumni && (
-        <div className="flex justify-end">
+      <div className="flex items-center justify-end gap-2">
+        {completedCount > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowCompleted((prev) => !prev)}
+          >
+            {showCompleted ? "Hide completed" : `Show completed (${completedCount})`}
+          </Button>
+        )}
+        {isAlumni && (
           <TaskFormDialog
             boards={boards}
             defaultBoardId={boardId}
             members={members}
             trigger={<Button>New task</Button>}
           />
-        </div>
-      )}
+        )}
+      </div>
 
       <div className="overflow-x-auto rounded-lg border border-border">
         <Table>
@@ -104,7 +120,7 @@ export function BoardTaskTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {tasks.map((task) => {
+            {visibleTasks.map((task) => {
               const isOwner = task.owner_id === currentUserId;
               const canChangeStatus = isAlumni || isOwner;
 
@@ -218,10 +234,12 @@ export function BoardTaskTable({
                 </TableRow>
               );
             })}
-            {tasks.length === 0 && (
+            {visibleTasks.length === 0 && (
               <TableRow>
                 <TableCell colSpan={isAlumni ? 7 : 6} className="text-center text-muted-foreground">
-                  No tasks on this board yet.
+                  {tasks.length === 0
+                    ? "No tasks on this board yet."
+                    : 'All tasks are done. Click "Show completed" above to see them.'}
                 </TableCell>
               </TableRow>
             )}

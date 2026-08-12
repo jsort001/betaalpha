@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { requireCurrentUser } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
-import { BoardTaskTable } from "@/components/board-task-table";
+import { BoardView } from "@/components/board-view";
 
 export default async function BoardPage({
   params,
@@ -73,7 +73,7 @@ export default async function BoardPage({
         )}
       </div>
 
-      <BoardTaskTable
+      <BoardView
         boardId={boardId}
         boards={allBoards ?? []}
         tasks={rows}
