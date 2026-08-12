@@ -1,5 +1,6 @@
 "use client";
 
+import { forwardRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   DndContext,
@@ -54,11 +55,19 @@ const PRIORITY_BORDER: Record<string, string> = {
   low: "border-l-4 border-l-border",
 };
 
-function TaskCardInfo({ task }: { task: TaskRow }) {
+const TaskCardInfo = forwardRef<
+  HTMLDivElement,
+  React.ComponentProps<"div"> & { task: TaskRow }
+>(function TaskCardInfo({ task, className, onPointerDown, ...props }, ref) {
   return (
     <div
-      className="flex cursor-pointer flex-col gap-2"
-      onPointerDown={(e) => e.stopPropagation()}
+      ref={ref}
+      className={cn("flex cursor-pointer flex-col gap-2", className)}
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        onPointerDown?.(e);
+      }}
+      {...props}
     >
       <p className="text-sm font-medium">{task.title}</p>
       {task.description && (
@@ -77,7 +86,7 @@ function TaskCardInfo({ task }: { task: TaskRow }) {
       </div>
     </div>
   );
-}
+});
 
 function TaskCard({
   task,
