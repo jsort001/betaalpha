@@ -19,6 +19,31 @@ export const BOARD_CATEGORIES = [
 ] as const;
 export type BoardCategory = (typeof BOARD_CATEGORIES)[number];
 
+// Static titles for boards that recur on a predictable schedule, kept
+// consistent across years for tracking purposes. Add new ones here as
+// they come up.
+export const RECURRING_BOARD_TITLES = [
+  "Fall Informational",
+  "Spring Informational",
+] as const;
+
+// Tasks auto-created on a new board when its name matches a key here.
+// Only applies on creation, not editing, and only for titles listed —
+// add an entry whenever a recurring title should seed its own tasks.
+const INFORMATIONAL_TASK_TEMPLATE = [
+  "Reserve room and date",
+  "Reserve AV equipment",
+  "Order food",
+  "Update powerpoint presentation",
+  "Design flyer",
+  "Distribute flyers",
+];
+
+export const BOARD_TASK_TEMPLATES: Record<string, string[]> = {
+  "Fall Informational": INFORMATIONAL_TASK_TEMPLATE,
+  "Spring Informational": INFORMATIONAL_TASK_TEMPLATE,
+};
+
 export interface Database {
   public: {
     Tables: {

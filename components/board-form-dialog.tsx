@@ -22,7 +22,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BOARD_CATEGORIES, type BoardCategory } from "@/lib/supabase/types";
+import {
+  BOARD_CATEGORIES,
+  BOARD_TASK_TEMPLATES,
+  RECURRING_BOARD_TITLES,
+  type BoardCategory,
+} from "@/lib/supabase/types";
 
 export interface BoardFormValues {
   id?: string;
@@ -32,6 +37,11 @@ export interface BoardFormValues {
 }
 
 const DEFAULT_VALUES: BoardFormValues = { name: "", description: "", category: "none" };
+const CUSTOM_NAME = "custom";
+
+function initialNameSelection(name: string): string {
+  return (RECURRING_BOARD_TITLES as readonly string[]).includes(name) ? name : CUSTOM_NAME;
+}
 
 export function BoardFormDialog({
   trigger,
@@ -44,6 +54,14 @@ export function BoardFormDialog({
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [values, setValues] = useState<BoardFormValues>(initial ?? DEFAULT_VALUES);
+  const [nameSelection, setNameSelection] = useState(() =>
+    initialNameSelection((initial ?? DEFAULT_VALUES).name)
+  );
+
+  function selectName(v: string) {
+    setNameSelection(v);
+    setValues((prev) => ({ ...prev, name: v === CUSTOM_NAME ? "" : v }));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -59,7 +77,25 @@ export function BoardFormDialog({
     if (values.id) {
       await supabase.from("boards").update(payload).eq("id", values.id);
     } else {
-      await supabase.from("boards").insert(payload);
+      const { data: newBoard } = await supabase
+        .from("boards")
+        .insert(payload)
+        .select("id")
+        .single();
+
+      const template = BOARD_TASK_TEMPLATES[values.name];
+      if (newBoard && template) {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        await supabase.from("tasks").insert(
+          template.map((title) => ({
+            board_id: newBoard.id,
+            title,
+            created_by: user!.id,
+          }))
+        );
+      }
     }
 
     setSaving(false);
@@ -77,13 +113,30 @@ export function BoardFormDialog({
           </DialogHeader>
 
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="board-name">Name</Label>
-            <Input
-              id="board-name"
-              required
-              value={values.name}
-              onChange={(e) => setValues((prev) => ({ ...prev, name: e.target.value }))}
-            />
+            <Label>Name</Label>
+            <Select value={nameSelection} onValueChange={(v) => v && selectName(v)}>
+              <SelectTrigger>
+                <SelectValue>
+                  {(v: string) => (v === CUSTOM_NAME ? "Custom" : v)}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                {RECURRING_BOARD_TITLES.map((title) => (
+                  <SelectItem key={title} value={title}>
+                    {title}
+                  </SelectItem>
+                ))}
+                <SelectItem value={CUSTOM_NAME}>Custom</SelectItem>
+              </SelectContent>
+            </Select>
+            {nameSelection === CUSTOM_NAME && (
+              <Input
+                placeholder="Board name"
+                required
+                value={values.name}
+                onChange={(e) => setValues((prev) => ({ ...prev, name: e.target.value }))}
+              />
+            )}
           </div>
 
           <div className="flex flex-col gap-1.5">
