@@ -10,22 +10,34 @@ export default async function DashboardPage() {
   const currentUser = await requireCurrentUser();
   const supabase = await createClient();
 
-  const [{ data: myTasks }, { data: boards }, { data: openTasks }, { data: members }] =
-    await Promise.all([
-      supabase
-        .from("tasks")
-        .select(
-          "id, title, description, due_date, status, board_id, owner_id, priority, recurrence_rule"
-        )
-        .eq("owner_id", currentUser.id)
-        .neq("status", "done")
-        .order("due_date", { ascending: true, nullsFirst: false }),
-      supabase.from("boards").select("id, name, description, category").order("name"),
-      supabase.from("tasks").select("board_id, status, due_date").neq("status", "done"),
-      supabase.from("users").select("id, name").order("name"),
-    ]);
+  const [
+    { data: myTasks },
+    { data: boards },
+    { data: openTasks },
+    { data: members },
+    { data: allowlist },
+  ] = await Promise.all([
+    supabase
+      .from("tasks")
+      .select(
+        "id, title, description, due_date, status, board_id, owner_id, priority, recurrence_rule"
+      )
+      .eq("owner_id", currentUser.id)
+      .neq("status", "done")
+      .order("due_date", { ascending: true, nullsFirst: false }),
+    supabase.from("boards").select("id, name, description, category").order("name"),
+    supabase.from("tasks").select("board_id, status, due_date").neq("status", "done"),
+    supabase.from("users").select("id, name, email").order("name"),
+    currentUser.role === "alumni"
+      ? supabase.from("allowlist").select("email, name, assigned_role")
+      : Promise.resolve({ data: null }),
+  ]);
 
   const boardNameById = new Map((boards ?? []).map((b) => [b.id, b.name]));
+  const signedUpEmails = new Set((members ?? []).map((m) => m.email));
+  const pendingMembers = (allowlist ?? [])
+    .filter((a) => a.assigned_role === "undergrad" && !signedUpEmails.has(a.email))
+    .map((a) => ({ email: a.email, name: a.name }));
 
   const myTaskIds = (myTasks ?? []).map((t) => t.id);
   const { data: commentRows } = myTaskIds.length
@@ -61,6 +73,7 @@ export default async function DashboardPage() {
               boards={boards}
               defaultBoardId={boards[0].id}
               members={members ?? []}
+              pendingMembers={pendingMembers}
               trigger={<Button size="sm">New task</Button>}
             />
           )}
@@ -74,6 +87,7 @@ export default async function DashboardPage() {
             }))}
             boards={boards ?? []}
             members={members ?? []}
+            pendingMembers={pendingMembers}
             isAlumni={currentUser.role === "alumni"}
           />
         ) : (

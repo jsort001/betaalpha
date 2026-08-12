@@ -31,11 +31,17 @@ interface Member {
   name: string;
 }
 
+interface PendingMember {
+  email: string;
+  name: string;
+}
+
 interface TaskRow {
   id: string;
   title: string;
   description: string | null;
   owner_id: string | null;
+  pending_owner_email: string | null;
   due_date: string | null;
   status: TaskStatus;
   priority: string;
@@ -54,6 +60,7 @@ export function BoardTaskTable({
   boards,
   tasks,
   members,
+  pendingMembers = [],
   currentUserId,
   isAlumni,
 }: {
@@ -61,6 +68,7 @@ export function BoardTaskTable({
   boards: Board[];
   tasks: TaskRow[];
   members: Member[];
+  pendingMembers?: PendingMember[];
   currentUserId: string;
   isAlumni: boolean;
 }) {
@@ -188,6 +196,7 @@ export function BoardTaskTable({
                           boards={boards}
                           defaultBoardId={boardId}
                           members={members}
+                          pendingMembers={pendingMembers}
                           trigger={
                             <Button variant="outline" size="sm">
                               Edit
@@ -199,6 +208,7 @@ export function BoardTaskTable({
                             title: task.title,
                             description: task.description ?? "",
                             owner_id: task.owner_id,
+                            pending_owner_email: task.pending_owner_email,
                             due_date: task.due_date ?? "",
                             status: task.status,
                             priority: task.priority,
@@ -209,6 +219,7 @@ export function BoardTaskTable({
                           boards={boards}
                           defaultBoardId={boardId}
                           members={members}
+                          pendingMembers={pendingMembers}
                           trigger={
                             <Button variant="outline" size="sm">
                               Clone
@@ -219,6 +230,7 @@ export function BoardTaskTable({
                             title: `${task.title} (Copy)`,
                             description: task.description ?? "",
                             owner_id: task.owner_id,
+                            pending_owner_email: task.pending_owner_email,
                             due_date: task.due_date ?? "",
                             status: "not_started",
                             priority: task.priority,

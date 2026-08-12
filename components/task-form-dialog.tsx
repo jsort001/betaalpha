@@ -43,6 +43,11 @@ interface Member {
   name: string;
 }
 
+interface PendingMember {
+  email: string;
+  name: string;
+}
+
 interface Board {
   id: string;
   name: string;
@@ -54,6 +59,7 @@ export interface TaskFormValues {
   title: string;
   description: string;
   owner_id: string | null;
+  pending_owner_email: string | null;
   due_date: string;
   status: TaskStatus;
   priority: string;
@@ -66,6 +72,7 @@ function defaultValues(defaultBoardId: string): TaskFormValues {
     title: "",
     description: "",
     owner_id: null,
+    pending_owner_email: null,
     due_date: "",
     status: "not_started",
     priority: "normal",
@@ -73,16 +80,20 @@ function defaultValues(defaultBoardId: string): TaskFormValues {
   };
 }
 
+const PENDING_PREFIX = "pending:";
+
 export function TaskFormDialog({
   boards,
   defaultBoardId,
   members,
+  pendingMembers = [],
   trigger,
   initial,
 }: {
   boards: Board[];
   defaultBoardId: string;
   members: Member[];
+  pendingMembers?: PendingMember[];
   trigger: React.ReactElement;
   initial?: TaskFormValues;
 }) {
@@ -97,6 +108,26 @@ export function TaskFormDialog({
     setValues((prev) => ({ ...prev, [key]: value }));
   }
 
+  function selectOwner(v: string) {
+    if (v === "unassigned") {
+      setValues((prev) => ({ ...prev, owner_id: null, pending_owner_email: null }));
+    } else if (v.startsWith(PENDING_PREFIX)) {
+      setValues((prev) => ({
+        ...prev,
+        owner_id: null,
+        pending_owner_email: v.slice(PENDING_PREFIX.length),
+      }));
+    } else {
+      setValues((prev) => ({ ...prev, owner_id: v, pending_owner_email: null }));
+    }
+  }
+
+  const ownerSelection = values.owner_id
+    ? values.owner_id
+    : values.pending_owner_email
+      ? `${PENDING_PREFIX}${values.pending_owner_email}`
+      : "unassigned";
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -107,6 +138,7 @@ export function TaskFormDialog({
       title: values.title,
       description: values.description || null,
       owner_id: values.owner_id,
+      pending_owner_email: values.pending_owner_email,
       due_date: values.due_date || null,
       status: values.status,
       priority: values.priority,
@@ -182,17 +214,18 @@ export function TaskFormDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
               <Label>Owner</Label>
-              <Select
-                value={values.owner_id ?? "unassigned"}
-                onValueChange={(v) => update("owner_id", v === "unassigned" ? null : v)}
-              >
+              <Select value={ownerSelection} onValueChange={(v) => v && selectOwner(v)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Unassigned">
-                    {(v: string) =>
-                      v === "unassigned"
-                        ? "Unassigned"
-                        : members.find((m) => m.id === v)?.name ?? "Unassigned"
-                    }
+                    {(v: string) => {
+                      if (v === "unassigned") return "Unassigned";
+                      if (v.startsWith(PENDING_PREFIX)) {
+                        const email = v.slice(PENDING_PREFIX.length);
+                        const name = pendingMembers.find((p) => p.email === email)?.name;
+                        return name ? `${name} (pending signup)` : email;
+                      }
+                      return members.find((m) => m.id === v)?.name ?? "Unassigned";
+                    }}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
@@ -200,6 +233,11 @@ export function TaskFormDialog({
                   {members.map((m) => (
                     <SelectItem key={m.id} value={m.id}>
                       {m.name}
+                    </SelectItem>
+                  ))}
+                  {pendingMembers.map((p) => (
+                    <SelectItem key={p.email} value={`${PENDING_PREFIX}${p.email}`}>
+                      {p.name} (pending signup)
                     </SelectItem>
                   ))}
                 </SelectContent>

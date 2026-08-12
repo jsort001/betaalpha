@@ -12,6 +12,11 @@ interface Member {
   name: string;
 }
 
+interface PendingMember {
+  email: string;
+  name: string;
+}
+
 interface Board {
   id: string;
   name: string;
@@ -22,6 +27,7 @@ interface TaskRow {
   title: string;
   description: string | null;
   owner_id: string | null;
+  pending_owner_email: string | null;
   due_date: string | null;
   status: TaskStatus;
   priority: string;
@@ -37,6 +43,7 @@ export function BoardView({
   boards,
   tasks,
   members,
+  pendingMembers = [],
   currentUserId,
   isAlumni,
 }: {
@@ -44,6 +51,7 @@ export function BoardView({
   boards: Board[];
   tasks: TaskRow[];
   members: Member[];
+  pendingMembers?: PendingMember[];
   currentUserId: string;
   isAlumni: boolean;
 }) {
@@ -85,6 +93,7 @@ export function BoardView({
             boards={boards}
             defaultBoardId={boardId}
             members={members}
+            pendingMembers={pendingMembers}
             trigger={<Button size="sm">New task</Button>}
           />
         )}
@@ -96,6 +105,7 @@ export function BoardView({
           boards={boards}
           tasks={tasks}
           members={members}
+          pendingMembers={pendingMembers}
           currentUserId={currentUserId}
           isAlumni={isAlumni}
         />
@@ -105,6 +115,7 @@ export function BoardView({
           boards={boards}
           tasks={tasks}
           members={members}
+          pendingMembers={pendingMembers}
           currentUserId={currentUserId}
           isAlumni={isAlumni}
         />

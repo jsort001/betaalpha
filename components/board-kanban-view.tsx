@@ -29,6 +29,11 @@ interface Member {
   name: string;
 }
 
+interface PendingMember {
+  email: string;
+  name: string;
+}
+
 interface Board {
   id: string;
   name: string;
@@ -39,6 +44,7 @@ interface TaskRow {
   title: string;
   description: string | null;
   owner_id: string | null;
+  pending_owner_email: string | null;
   due_date: string | null;
   status: TaskStatus;
   priority: string;
@@ -93,6 +99,7 @@ function TaskCard({
   boardId,
   boards,
   members,
+  pendingMembers,
   isAlumni,
   draggable,
 }: {
@@ -100,6 +107,7 @@ function TaskCard({
   boardId: string;
   boards: Board[];
   members: Member[];
+  pendingMembers: PendingMember[];
   isAlumni: boolean;
   draggable: boolean;
 }) {
@@ -131,6 +139,7 @@ function TaskCard({
             boards={boards}
             defaultBoardId={boardId}
             members={members}
+            pendingMembers={pendingMembers}
             trigger={<TaskCardInfo task={task} />}
             initial={{
               id: task.id,
@@ -138,6 +147,7 @@ function TaskCard({
               title: task.title,
               description: task.description ?? "",
               owner_id: task.owner_id,
+              pending_owner_email: task.pending_owner_email,
               due_date: task.due_date ?? "",
               status: task.status,
               priority: task.priority,
@@ -175,6 +185,7 @@ function TaskCard({
               boards={boards}
               defaultBoardId={boardId}
               members={members}
+              pendingMembers={pendingMembers}
               trigger={
                 <Button variant="outline" size="xs" onPointerDown={(e) => e.stopPropagation()}>
                   Edit
@@ -186,6 +197,7 @@ function TaskCard({
                 title: task.title,
                 description: task.description ?? "",
                 owner_id: task.owner_id,
+                pending_owner_email: task.pending_owner_email,
                 due_date: task.due_date ?? "",
                 status: task.status,
                 priority: task.priority,
@@ -205,6 +217,7 @@ function Column({
   boardId,
   boards,
   members,
+  pendingMembers,
   currentUserId,
   isAlumni,
 }: {
@@ -213,6 +226,7 @@ function Column({
   boardId: string;
   boards: Board[];
   members: Member[];
+  pendingMembers: PendingMember[];
   currentUserId: string;
   isAlumni: boolean;
 }) {
@@ -239,6 +253,7 @@ function Column({
             boardId={boardId}
             boards={boards}
             members={members}
+            pendingMembers={pendingMembers}
             isAlumni={isAlumni}
             draggable={isAlumni || task.owner_id === currentUserId}
           />
@@ -253,6 +268,7 @@ export function BoardKanbanView({
   boards,
   tasks,
   members,
+  pendingMembers = [],
   currentUserId,
   isAlumni,
 }: {
@@ -260,6 +276,7 @@ export function BoardKanbanView({
   boards: Board[];
   tasks: TaskRow[];
   members: Member[];
+  pendingMembers?: PendingMember[];
   currentUserId: string;
   isAlumni: boolean;
 }) {
@@ -292,6 +309,7 @@ export function BoardKanbanView({
             boardId={boardId}
             boards={boards}
             members={members}
+            pendingMembers={pendingMembers}
             currentUserId={currentUserId}
             isAlumni={isAlumni}
           />
