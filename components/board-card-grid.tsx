@@ -15,11 +15,9 @@ interface Board {
 export function BoardCardGrid({
   boards,
   boardStats,
-  isAlumni,
 }: {
   boards: Board[];
   boardStats: Map<string, { open: number; overdue: number }>;
-  isAlumni: boolean;
 }) {
   if (boards.length === 0) {
     return <p className="text-sm text-muted-foreground">No boards yet.</p>;
@@ -43,21 +41,19 @@ export function BoardCardGrid({
                   </Badge>
                 )}
               </Link>
-              {isAlumni && (
-                <BoardFormDialog
-                  trigger={
-                    <Button variant="outline" size="sm">
-                      Edit
-                    </Button>
-                  }
-                  initial={{
-                    id: board.id,
-                    name: board.name,
-                    description: board.description ?? "",
-                    category: board.category ?? "none",
-                  }}
-                />
-              )}
+              <BoardFormDialog
+                trigger={
+                  <Button variant="outline" size="sm">
+                    Edit
+                  </Button>
+                }
+                initial={{
+                  id: board.id,
+                  name: board.name,
+                  description: board.description ?? "",
+                  category: board.category ?? "none",
+                }}
+              />
             </CardHeader>
             <Link href={`/dashboard/boards/${board.id}`}>
               <CardContent className="flex items-center gap-3 text-sm text-muted-foreground">

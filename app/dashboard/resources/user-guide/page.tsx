@@ -193,7 +193,8 @@ export default function UserGuidePage() {
               </Badge>
               <ul className="flex flex-col gap-1.5 text-sm text-muted-foreground">
                 <li>See every board and every task, across all hermanos</li>
-                <li>Update the status on tasks assigned to you</li>
+                <li>Create, edit, and delete boards and tasks</li>
+                <li>Assign or reassign anyone, including yourself</li>
                 <li>Comment on any task and tag teammates</li>
                 <li>View a task&apos;s full history</li>
               </ul>
@@ -205,8 +206,6 @@ export default function UserGuidePage() {
                 Alumni / admin
               </Badge>
               <ul className="flex flex-col gap-1.5 text-sm text-primary-foreground/85">
-                <li>Create, edit, and delete boards and tasks</li>
-                <li>Assign or reassign anyone, including yourself</li>
                 <li>Manage who&apos;s allowed to sign in</li>
                 <li>Everything an undergrad can do</li>
               </ul>
@@ -282,14 +281,14 @@ export default function UserGuidePage() {
       </section>
 
       <section>
-        <Eyebrow>Starting a new project &middot; admins</Eyebrow>
+        <Eyebrow>Starting a new project</Eyebrow>
         <h2 className="text-xl font-bold tracking-tight text-primary">
           Creating a board
         </h2>
         <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-          Board creation is an admin action — but knowing how it works
-          explains why boards like the Informationals show up already
-          stocked with tasks.
+          Anyone can create a board — knowing how it works also explains
+          why boards like the Informationals show up already stocked
+          with tasks.
         </p>
         <div className="mt-4">
           <Step n={1} title="New board">

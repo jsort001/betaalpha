@@ -1,6 +1,5 @@
 "use client";
 
-import { forwardRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   DndContext,
@@ -61,60 +60,22 @@ const PRIORITY_BORDER: Record<string, string> = {
   low: "border-l-4 border-l-border",
 };
 
-const TaskCardInfo = forwardRef<
-  HTMLDivElement,
-  React.ComponentProps<"div"> & { task: TaskRow }
->(function TaskCardInfo({ task, className, onPointerDown, ...props }, ref) {
-  return (
-    <div
-      ref={ref}
-      className={cn("flex cursor-pointer flex-col gap-2", className)}
-      onPointerDown={(e) => {
-        e.stopPropagation();
-        onPointerDown?.(e);
-      }}
-      {...props}
-    >
-      <p className="text-sm font-medium">{task.title}</p>
-      {task.description && (
-        <p className="line-clamp-2 text-xs text-muted-foreground">
-          {task.description}
-        </p>
-      )}
-      <p className="text-xs text-muted-foreground">
-        {task.owner_name ?? "Unassigned"}
-      </p>
-      <div className="flex flex-wrap items-center gap-2">
-        <DueDateBadge dueDate={task.due_date} done={task.status === "done"} />
-        <Badge variant="outline" className="capitalize">
-          {task.priority}
-        </Badge>
-      </div>
-    </div>
-  );
-});
-
 function TaskCard({
   task,
   boardId,
   boards,
   members,
   pendingMembers,
-  isAlumni,
-  draggable,
 }: {
   task: TaskRow;
   boardId: string;
   boards: Board[];
   members: Member[];
   pendingMembers: PendingMember[];
-  isAlumni: boolean;
-  draggable: boolean;
 }) {
   const router = useRouter();
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
-    disabled: !draggable,
   });
 
   const style = transform
@@ -137,38 +98,52 @@ function TaskCard({
       style={style}
       className={cn(
         PRIORITY_BORDER[task.priority] ?? PRIORITY_BORDER.normal,
-        draggable && "cursor-grab touch-none active:cursor-grabbing"
+        "cursor-grab touch-none active:cursor-grabbing"
       )}
-      {...(draggable ? { ...attributes, ...listeners } : {})}
+      {...attributes}
+      {...listeners}
     >
       <CardContent className="flex flex-col gap-2 py-3">
-        {isAlumni ? (
-          <TaskFormDialog
-            boards={boards}
-            defaultBoardId={boardId}
-            members={members}
-            pendingMembers={pendingMembers}
-            trigger={<TaskCardInfo task={task} />}
-            initial={{
-              id: task.id,
-              board_id: boardId,
-              title: task.title,
-              description: task.description ?? "",
-              owner_id: task.owner_id,
-              pending_owner_email: task.pending_owner_email,
-              due_date: task.due_date ?? "",
-              status: task.status,
-              priority: task.priority,
-              recurrence_rule: task.recurrence_rule ?? "none",
-            }}
-          />
-        ) : (
-          <TaskCommentsDialog
-            taskId={task.id}
-            members={members}
-            trigger={<TaskCardInfo task={task} />}
-          />
-        )}
+        <TaskFormDialog
+          boards={boards}
+          defaultBoardId={boardId}
+          members={members}
+          pendingMembers={pendingMembers}
+          trigger={
+            <div
+              className="flex cursor-pointer flex-col gap-2"
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              <p className="text-sm font-medium">{task.title}</p>
+              {task.description && (
+                <p className="line-clamp-2 text-xs text-muted-foreground">
+                  {task.description}
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                {task.owner_name ?? "Unassigned"}
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <DueDateBadge dueDate={task.due_date} done={task.status === "done"} />
+                <Badge variant="outline" className="capitalize">
+                  {task.priority}
+                </Badge>
+              </div>
+            </div>
+          }
+          initial={{
+            id: task.id,
+            board_id: boardId,
+            title: task.title,
+            description: task.description ?? "",
+            owner_id: task.owner_id,
+            pending_owner_email: task.pending_owner_email,
+            due_date: task.due_date ?? "",
+            status: task.status,
+            priority: task.priority,
+            recurrence_rule: task.recurrence_rule ?? "none",
+          }}
+        />
         <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
           <TaskCommentsDialog
             taskId={task.id}
@@ -188,42 +163,38 @@ function TaskCard({
               </Button>
             }
           />
-          {isAlumni && (
-            <TaskFormDialog
-              boards={boards}
-              defaultBoardId={boardId}
-              members={members}
-              pendingMembers={pendingMembers}
-              trigger={
-                <Button variant="outline" size="xs" onPointerDown={(e) => e.stopPropagation()}>
-                  Edit
-                </Button>
-              }
-              initial={{
-                id: task.id,
-                board_id: boardId,
-                title: task.title,
-                description: task.description ?? "",
-                owner_id: task.owner_id,
-                pending_owner_email: task.pending_owner_email,
-                due_date: task.due_date ?? "",
-                status: task.status,
-                priority: task.priority,
-                recurrence_rule: task.recurrence_rule ?? "none",
-              }}
-            />
-          )}
-          {isAlumni && (
-            <Button
-              variant="ghost"
-              size="xs"
-              className="text-destructive"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={handleDelete}
-            >
-              Delete
-            </Button>
-          )}
+          <TaskFormDialog
+            boards={boards}
+            defaultBoardId={boardId}
+            members={members}
+            pendingMembers={pendingMembers}
+            trigger={
+              <Button variant="outline" size="xs" onPointerDown={(e) => e.stopPropagation()}>
+                Edit
+              </Button>
+            }
+            initial={{
+              id: task.id,
+              board_id: boardId,
+              title: task.title,
+              description: task.description ?? "",
+              owner_id: task.owner_id,
+              pending_owner_email: task.pending_owner_email,
+              due_date: task.due_date ?? "",
+              status: task.status,
+              priority: task.priority,
+              recurrence_rule: task.recurrence_rule ?? "none",
+            }}
+          />
+          <Button
+            variant="ghost"
+            size="xs"
+            className="text-destructive"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={handleDelete}
+          >
+            Delete
+          </Button>
         </div>
       </CardContent>
     </Card>
@@ -237,8 +208,6 @@ function Column({
   boards,
   members,
   pendingMembers,
-  currentUserId,
-  isAlumni,
 }: {
   status: TaskStatus;
   tasks: TaskRow[];
@@ -246,8 +215,6 @@ function Column({
   boards: Board[];
   members: Member[];
   pendingMembers: PendingMember[];
-  currentUserId: string;
-  isAlumni: boolean;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -273,8 +240,6 @@ function Column({
             boards={boards}
             members={members}
             pendingMembers={pendingMembers}
-            isAlumni={isAlumni}
-            draggable={isAlumni || task.owner_id === currentUserId}
           />
         ))}
       </div>
@@ -288,16 +253,12 @@ export function BoardKanbanView({
   tasks,
   members,
   pendingMembers = [],
-  currentUserId,
-  isAlumni,
 }: {
   boardId: string;
   boards: Board[];
   tasks: TaskRow[];
   members: Member[];
   pendingMembers?: PendingMember[];
-  currentUserId: string;
-  isAlumni: boolean;
 }) {
   const router = useRouter();
   const sensors = useSensors(
@@ -329,8 +290,6 @@ export function BoardKanbanView({
             boards={boards}
             members={members}
             pendingMembers={pendingMembers}
-            currentUserId={currentUserId}
-            isAlumni={isAlumni}
           />
         ))}
       </div>

@@ -44,16 +44,12 @@ export function BoardView({
   tasks,
   members,
   pendingMembers = [],
-  currentUserId,
-  isAlumni,
 }: {
   boardId: string;
   boards: Board[];
   tasks: TaskRow[];
   members: Member[];
   pendingMembers?: PendingMember[];
-  currentUserId: string;
-  isAlumni: boolean;
 }) {
   const [view, setView] = useState<"list" | "board">("list");
 
@@ -88,15 +84,13 @@ export function BoardView({
             Board
           </Button>
         </div>
-        {isAlumni && (
-          <TaskFormDialog
-            boards={boards}
-            defaultBoardId={boardId}
-            members={members}
-            pendingMembers={pendingMembers}
-            trigger={<Button size="sm">New task</Button>}
-          />
-        )}
+        <TaskFormDialog
+          boards={boards}
+          defaultBoardId={boardId}
+          members={members}
+          pendingMembers={pendingMembers}
+          trigger={<Button size="sm">New task</Button>}
+        />
       </div>
 
       {view === "list" ? (
@@ -106,8 +100,6 @@ export function BoardView({
           tasks={tasks}
           members={members}
           pendingMembers={pendingMembers}
-          currentUserId={currentUserId}
-          isAlumni={isAlumni}
         />
       ) : (
         <BoardKanbanView
@@ -116,8 +108,6 @@ export function BoardView({
           tasks={tasks}
           members={members}
           pendingMembers={pendingMembers}
-          currentUserId={currentUserId}
-          isAlumni={isAlumni}
         />
       )}
     </div>

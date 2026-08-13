@@ -21,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { StatusBadge, STATUS_LABELS } from "@/components/status-badge";
+import { STATUS_LABELS } from "@/components/status-badge";
 import { DueDateBadge } from "@/components/due-date-badge";
 import { TaskFormDialog } from "@/components/task-form-dialog";
 import { TaskCommentsDialog } from "@/components/task-comments-dialog";
@@ -63,16 +63,12 @@ export function BoardTaskTable({
   tasks,
   members,
   pendingMembers = [],
-  currentUserId,
-  isAlumni,
 }: {
   boardId: string;
   boards: Board[];
   tasks: TaskRow[];
   members: Member[];
   pendingMembers?: PendingMember[];
-  currentUserId: string;
-  isAlumni: boolean;
 }) {
   const router = useRouter();
   const [showCompleted, setShowCompleted] = useState(false);
@@ -110,129 +106,116 @@ export function BoardTaskTable({
       )}
 
       <div className="flex flex-col gap-3 sm:hidden">
-        {visibleTasks.map((task) => {
-          const isOwner = task.owner_id === currentUserId;
-          const canChangeStatus = isAlumni || isOwner;
-
-          return (
-            <Card key={task.id}>
-              <CardContent className="flex flex-col gap-2 py-3">
-                <p className="text-sm font-medium">
-                  {task.title}
-                  {task.recurrence_rule && (
-                    <span className="ml-2 text-xs capitalize text-muted-foreground">
-                      ({task.recurrence_rule})
-                    </span>
-                  )}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {task.owner_name ?? "Unassigned"}
-                </p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <DueDateBadge dueDate={task.due_date} done={task.status === "done"} />
-                  <Badge variant="outline" className="capitalize">
-                    {task.priority}
-                  </Badge>
-                </div>
-                {canChangeStatus ? (
-                  <Select
-                    value={task.status}
-                    onValueChange={(v) => v && updateStatus(task.id, v as TaskStatus)}
-                  >
-                    <SelectTrigger size="sm" className="w-[150px]">
-                      <SelectValue>{(v: TaskStatus) => STATUS_LABELS[v]}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="not_started">{STATUS_LABELS.not_started}</SelectItem>
-                      <SelectItem value="in_progress">{STATUS_LABELS.in_progress}</SelectItem>
-                      <SelectItem value="done">{STATUS_LABELS.done}</SelectItem>
-                      <SelectItem value="blocked">{STATUS_LABELS.blocked}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <StatusBadge status={task.status} />
+        {visibleTasks.map((task) => (
+          <Card key={task.id}>
+            <CardContent className="flex flex-col gap-2 py-3">
+              <p className="text-sm font-medium">
+                {task.title}
+                {task.recurrence_rule && (
+                  <span className="ml-2 text-xs capitalize text-muted-foreground">
+                    ({task.recurrence_rule})
+                  </span>
                 )}
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <TaskCommentsDialog
-                    taskId={task.id}
-                    members={members}
-                    trigger={
-                      <Button variant="outline" size="sm">
-                        {task.commentCount > 0 ? task.commentCount : "Comment"}
-                      </Button>
-                    }
-                  />
-                  <TaskHistoryDialog
-                    taskId={task.id}
-                    members={members}
-                    trigger={
-                      <Button variant="outline" size="sm">
-                        History
-                      </Button>
-                    }
-                  />
-                  {isAlumni && (
-                    <>
-                      <TaskFormDialog
-                        boards={boards}
-                        defaultBoardId={boardId}
-                        members={members}
-                        pendingMembers={pendingMembers}
-                        trigger={
-                          <Button variant="outline" size="sm">
-                            Edit
-                          </Button>
-                        }
-                        initial={{
-                          id: task.id,
-                          board_id: boardId,
-                          title: task.title,
-                          description: task.description ?? "",
-                          owner_id: task.owner_id,
-                          pending_owner_email: task.pending_owner_email,
-                          due_date: task.due_date ?? "",
-                          status: task.status,
-                          priority: task.priority,
-                          recurrence_rule: task.recurrence_rule ?? "none",
-                        }}
-                      />
-                      <TaskFormDialog
-                        boards={boards}
-                        defaultBoardId={boardId}
-                        members={members}
-                        pendingMembers={pendingMembers}
-                        trigger={
-                          <Button variant="outline" size="sm">
-                            Clone
-                          </Button>
-                        }
-                        initial={{
-                          board_id: boardId,
-                          title: `${task.title} (Copy)`,
-                          description: task.description ?? "",
-                          owner_id: task.owner_id,
-                          pending_owner_email: task.pending_owner_email,
-                          due_date: task.due_date ?? "",
-                          status: "not_started",
-                          priority: task.priority,
-                          recurrence_rule: task.recurrence_rule ?? "none",
-                        }}
-                      />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive"
-                        onClick={() => deleteTask(task.id)}
-                      >
-                        Delete
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {task.owner_name ?? "Unassigned"}
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <DueDateBadge dueDate={task.due_date} done={task.status === "done"} />
+                <Badge variant="outline" className="capitalize">
+                  {task.priority}
+                </Badge>
+              </div>
+              <Select
+                value={task.status}
+                onValueChange={(v) => v && updateStatus(task.id, v as TaskStatus)}
+              >
+                <SelectTrigger size="sm" className="w-[150px]">
+                  <SelectValue>{(v: TaskStatus) => STATUS_LABELS[v]}</SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="not_started">{STATUS_LABELS.not_started}</SelectItem>
+                  <SelectItem value="in_progress">{STATUS_LABELS.in_progress}</SelectItem>
+                  <SelectItem value="done">{STATUS_LABELS.done}</SelectItem>
+                  <SelectItem value="blocked">{STATUS_LABELS.blocked}</SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <TaskCommentsDialog
+                  taskId={task.id}
+                  members={members}
+                  trigger={
+                    <Button variant="outline" size="sm">
+                      {task.commentCount > 0 ? task.commentCount : "Comment"}
+                    </Button>
+                  }
+                />
+                <TaskHistoryDialog
+                  taskId={task.id}
+                  members={members}
+                  trigger={
+                    <Button variant="outline" size="sm">
+                      History
+                    </Button>
+                  }
+                />
+                <TaskFormDialog
+                  boards={boards}
+                  defaultBoardId={boardId}
+                  members={members}
+                  pendingMembers={pendingMembers}
+                  trigger={
+                    <Button variant="outline" size="sm">
+                      Edit
+                    </Button>
+                  }
+                  initial={{
+                    id: task.id,
+                    board_id: boardId,
+                    title: task.title,
+                    description: task.description ?? "",
+                    owner_id: task.owner_id,
+                    pending_owner_email: task.pending_owner_email,
+                    due_date: task.due_date ?? "",
+                    status: task.status,
+                    priority: task.priority,
+                    recurrence_rule: task.recurrence_rule ?? "none",
+                  }}
+                />
+                <TaskFormDialog
+                  boards={boards}
+                  defaultBoardId={boardId}
+                  members={members}
+                  pendingMembers={pendingMembers}
+                  trigger={
+                    <Button variant="outline" size="sm">
+                      Clone
+                    </Button>
+                  }
+                  initial={{
+                    board_id: boardId,
+                    title: `${task.title} (Copy)`,
+                    description: task.description ?? "",
+                    owner_id: task.owner_id,
+                    pending_owner_email: task.pending_owner_email,
+                    due_date: task.due_date ?? "",
+                    status: "not_started",
+                    priority: task.priority,
+                    recurrence_rule: task.recurrence_rule ?? "none",
+                  }}
+                />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-destructive"
+                  onClick={() => deleteTask(task.id)}
+                >
+                  Delete
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
         {visibleTasks.length === 0 && (
           <p className="text-center text-sm text-muted-foreground">
             {tasks.length === 0
@@ -253,142 +236,131 @@ export function BoardTaskTable({
               <TableHead>Priority</TableHead>
               <TableHead>Comments</TableHead>
               <TableHead>History</TableHead>
-              {isAlumni && <TableHead className="text-right">Actions</TableHead>}
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {visibleTasks.map((task) => {
-              const isOwner = task.owner_id === currentUserId;
-              const canChangeStatus = isAlumni || isOwner;
-
-              return (
-                <TableRow key={task.id}>
-                  <TableCell className="font-medium">
-                    {task.title}
-                    {task.recurrence_rule && (
-                      <span className="ml-2 text-xs capitalize text-muted-foreground">
-                        ({task.recurrence_rule})
-                      </span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {task.owner_name ?? "Unassigned"}
-                  </TableCell>
-                  <TableCell>
-                    <DueDateBadge dueDate={task.due_date} done={task.status === "done"} />
-                  </TableCell>
-                  <TableCell>
-                    {canChangeStatus ? (
-                      <Select
-                        value={task.status}
-                        onValueChange={(v) => v && updateStatus(task.id, v as TaskStatus)}
-                      >
-                        <SelectTrigger size="sm" className="w-[130px]">
-                          <SelectValue>
-                            {(v: TaskStatus) => STATUS_LABELS[v]}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="not_started">{STATUS_LABELS.not_started}</SelectItem>
-                          <SelectItem value="in_progress">{STATUS_LABELS.in_progress}</SelectItem>
-                          <SelectItem value="done">{STATUS_LABELS.done}</SelectItem>
-                          <SelectItem value="blocked">{STATUS_LABELS.blocked}</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <StatusBadge status={task.status} />
-                    )}
-                  </TableCell>
-                  <TableCell className="capitalize text-muted-foreground">
-                    {task.priority}
-                  </TableCell>
-                  <TableCell>
-                    <TaskCommentsDialog
-                      taskId={task.id}
-                      members={members}
-                      trigger={
-                        <Button variant="outline" size="sm">
-                          {task.commentCount > 0 ? task.commentCount : "Comment"}
-                        </Button>
-                      }
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <TaskHistoryDialog
-                      taskId={task.id}
-                      members={members}
-                      trigger={
-                        <Button variant="outline" size="sm">
-                          History
-                        </Button>
-                      }
-                    />
-                  </TableCell>
-                  {isAlumni && (
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <TaskFormDialog
-                          boards={boards}
-                          defaultBoardId={boardId}
-                          members={members}
-                          pendingMembers={pendingMembers}
-                          trigger={
-                            <Button variant="outline" size="sm">
-                              Edit
-                            </Button>
-                          }
-                          initial={{
-                            id: task.id,
-                            board_id: boardId,
-                            title: task.title,
-                            description: task.description ?? "",
-                            owner_id: task.owner_id,
-                            pending_owner_email: task.pending_owner_email,
-                            due_date: task.due_date ?? "",
-                            status: task.status,
-                            priority: task.priority,
-                            recurrence_rule: task.recurrence_rule ?? "none",
-                          }}
-                        />
-                        <TaskFormDialog
-                          boards={boards}
-                          defaultBoardId={boardId}
-                          members={members}
-                          pendingMembers={pendingMembers}
-                          trigger={
-                            <Button variant="outline" size="sm">
-                              Clone
-                            </Button>
-                          }
-                          initial={{
-                            board_id: boardId,
-                            title: `${task.title} (Copy)`,
-                            description: task.description ?? "",
-                            owner_id: task.owner_id,
-                            pending_owner_email: task.pending_owner_email,
-                            due_date: task.due_date ?? "",
-                            status: "not_started",
-                            priority: task.priority,
-                            recurrence_rule: task.recurrence_rule ?? "none",
-                          }}
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive"
-                          onClick={() => deleteTask(task.id)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </TableCell>
+            {visibleTasks.map((task) => (
+              <TableRow key={task.id}>
+                <TableCell className="font-medium">
+                  {task.title}
+                  {task.recurrence_rule && (
+                    <span className="ml-2 text-xs capitalize text-muted-foreground">
+                      ({task.recurrence_rule})
+                    </span>
                   )}
-                </TableRow>
-              );
-            })}
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {task.owner_name ?? "Unassigned"}
+                </TableCell>
+                <TableCell>
+                  <DueDateBadge dueDate={task.due_date} done={task.status === "done"} />
+                </TableCell>
+                <TableCell>
+                  <Select
+                    value={task.status}
+                    onValueChange={(v) => v && updateStatus(task.id, v as TaskStatus)}
+                  >
+                    <SelectTrigger size="sm" className="w-[130px]">
+                      <SelectValue>
+                        {(v: TaskStatus) => STATUS_LABELS[v]}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="not_started">{STATUS_LABELS.not_started}</SelectItem>
+                      <SelectItem value="in_progress">{STATUS_LABELS.in_progress}</SelectItem>
+                      <SelectItem value="done">{STATUS_LABELS.done}</SelectItem>
+                      <SelectItem value="blocked">{STATUS_LABELS.blocked}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </TableCell>
+                <TableCell className="capitalize text-muted-foreground">
+                  {task.priority}
+                </TableCell>
+                <TableCell>
+                  <TaskCommentsDialog
+                    taskId={task.id}
+                    members={members}
+                    trigger={
+                      <Button variant="outline" size="sm">
+                        {task.commentCount > 0 ? task.commentCount : "Comment"}
+                      </Button>
+                    }
+                  />
+                </TableCell>
+                <TableCell>
+                  <TaskHistoryDialog
+                    taskId={task.id}
+                    members={members}
+                    trigger={
+                      <Button variant="outline" size="sm">
+                        History
+                      </Button>
+                    }
+                  />
+                </TableCell>
+                <TableCell className="text-right">
+                  <div className="flex justify-end gap-2">
+                    <TaskFormDialog
+                      boards={boards}
+                      defaultBoardId={boardId}
+                      members={members}
+                      pendingMembers={pendingMembers}
+                      trigger={
+                        <Button variant="outline" size="sm">
+                          Edit
+                        </Button>
+                      }
+                      initial={{
+                        id: task.id,
+                        board_id: boardId,
+                        title: task.title,
+                        description: task.description ?? "",
+                        owner_id: task.owner_id,
+                        pending_owner_email: task.pending_owner_email,
+                        due_date: task.due_date ?? "",
+                        status: task.status,
+                        priority: task.priority,
+                        recurrence_rule: task.recurrence_rule ?? "none",
+                      }}
+                    />
+                    <TaskFormDialog
+                      boards={boards}
+                      defaultBoardId={boardId}
+                      members={members}
+                      pendingMembers={pendingMembers}
+                      trigger={
+                        <Button variant="outline" size="sm">
+                          Clone
+                        </Button>
+                      }
+                      initial={{
+                        board_id: boardId,
+                        title: `${task.title} (Copy)`,
+                        description: task.description ?? "",
+                        owner_id: task.owner_id,
+                        pending_owner_email: task.pending_owner_email,
+                        due_date: task.due_date ?? "",
+                        status: "not_started",
+                        priority: task.priority,
+                        recurrence_rule: task.recurrence_rule ?? "none",
+                      }}
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-destructive"
+                      onClick={() => deleteTask(task.id)}
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
             {visibleTasks.length === 0 && (
               <TableRow>
-                <TableCell colSpan={isAlumni ? 8 : 7} className="text-center text-muted-foreground">
+                <TableCell colSpan={8} className="text-center text-muted-foreground">
                   {tasks.length === 0
                     ? "No tasks on this board yet."
                     : 'All tasks are done. Click "Show completed" above to see them.'}

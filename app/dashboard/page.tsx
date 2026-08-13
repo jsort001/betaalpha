@@ -68,7 +68,7 @@ export default async function DashboardPage() {
           <h1 className="text-2xl font-bold tracking-tight text-primary">
             My Tasks
           </h1>
-          {currentUser.role === "alumni" && boards && boards.length > 0 && (
+          {boards && boards.length > 0 && (
             <TaskFormDialog
               boards={boards}
               defaultBoardId={boards[0].id}
@@ -88,7 +88,6 @@ export default async function DashboardPage() {
             boards={boards ?? []}
             members={members ?? []}
             pendingMembers={pendingMembers}
-            isAlumni={currentUser.role === "alumni"}
           />
         ) : (
           <p className="text-sm text-muted-foreground">
@@ -102,15 +101,9 @@ export default async function DashboardPage() {
           <h2 className="text-xl font-bold tracking-tight text-primary">
             Project Boards
           </h2>
-          {currentUser.role === "alumni" && (
-            <BoardFormDialog trigger={<Button size="sm">New board</Button>} />
-          )}
+          <BoardFormDialog trigger={<Button size="sm">New board</Button>} />
         </div>
-        <BoardCardGrid
-          boards={boards ?? []}
-          boardStats={boardStats}
-          isAlumni={currentUser.role === "alumni"}
-        />
+        <BoardCardGrid boards={boards ?? []} boardStats={boardStats} />
       </section>
     </div>
   );

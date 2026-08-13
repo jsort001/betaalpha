@@ -17,7 +17,7 @@ export default async function CategoryPage({
   }
   const category = decoded as BoardCategory;
 
-  const currentUser = await requireCurrentUser();
+  await requireCurrentUser();
   const supabase = await createClient();
 
   const { data: boards } = await supabase
@@ -58,11 +58,7 @@ export default async function CategoryPage({
           Project boards in this category.
         </p>
       </div>
-      <BoardCardGrid
-        boards={boards ?? []}
-        boardStats={boardStats}
-        isAlumni={currentUser.role === "alumni"}
-      />
+      <BoardCardGrid boards={boards ?? []} boardStats={boardStats} />
     </div>
   );
 }

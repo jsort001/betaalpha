@@ -100,8 +100,6 @@ export default async function BoardPage({
         tasks={rows}
         members={members ?? []}
         pendingMembers={pendingMembers}
-        currentUserId={currentUser.id}
-        isAlumni={currentUser.role === "alumni"}
       />
     </div>
   );

@@ -52,13 +52,11 @@ export function MyTaskList({
   boards,
   members,
   pendingMembers = [],
-  isAlumni,
 }: {
   tasks: MyTask[];
   boards: Board[];
   members: Member[];
   pendingMembers?: PendingMember[];
-  isAlumni: boolean;
 }) {
   const router = useRouter();
 
@@ -111,31 +109,29 @@ export function MyTaskList({
                   </Button>
                 }
               />
-              {isAlumni && (
-                <TaskFormDialog
-                  boards={boards}
-                  defaultBoardId={task.board_id}
-                  members={members}
-                  pendingMembers={pendingMembers}
-                  trigger={
-                    <Button variant="outline" size="sm">
-                      Edit
-                    </Button>
-                  }
-                  initial={{
-                    id: task.id,
-                    board_id: task.board_id,
-                    title: task.title,
-                    description: task.description ?? "",
-                    owner_id: task.owner_id,
-                    pending_owner_email: null,
-                    due_date: task.due_date ?? "",
-                    status: task.status,
-                    priority: task.priority,
-                    recurrence_rule: task.recurrence_rule ?? "none",
-                  }}
-                />
-              )}
+              <TaskFormDialog
+                boards={boards}
+                defaultBoardId={task.board_id}
+                members={members}
+                pendingMembers={pendingMembers}
+                trigger={
+                  <Button variant="outline" size="sm">
+                    Edit
+                  </Button>
+                }
+                initial={{
+                  id: task.id,
+                  board_id: task.board_id,
+                  title: task.title,
+                  description: task.description ?? "",
+                  owner_id: task.owner_id,
+                  pending_owner_email: null,
+                  due_date: task.due_date ?? "",
+                  status: task.status,
+                  priority: task.priority,
+                  recurrence_rule: task.recurrence_rule ?? "none",
+                }}
+              />
             </div>
           </CardContent>
         </Card>
