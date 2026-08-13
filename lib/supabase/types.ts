@@ -258,7 +258,9 @@ export interface Database {
           body: string;
           created_at?: string;
         };
-        Update: never;
+        Update: Partial<{
+          body: string;
+        }>;
         Relationships: [];
       };
       comment_mentions: {

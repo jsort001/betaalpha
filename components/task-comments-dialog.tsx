@@ -41,6 +41,10 @@ export function TaskCommentsDialog({
   const [body, setBody] = useState("");
   const [taggedIds, setTaggedIds] = useState<Set<string>>(new Set());
   const [posting, setPosting] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+  const [editingBody, setEditingBody] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const nameById = new Map(members.map((m) => [m.id, m.name]));
 
@@ -81,9 +85,39 @@ export function TaskCommentsDialog({
   useEffect(() => {
     if (open) {
       loadComments();
+      createClient()
+        .auth.getUser()
+        .then(({ data }) => setCurrentUserId(data.user?.id ?? null));
+    } else {
+      setEditingCommentId(null);
+      setEditingBody("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
+
+  function startEditComment(comment: Comment) {
+    setEditingCommentId(comment.id);
+    setEditingBody(comment.body);
+  }
+
+  function cancelEditComment() {
+    setEditingCommentId(null);
+    setEditingBody("");
+  }
+
+  async function saveEditComment(commentId: string) {
+    if (!editingBody.trim()) return;
+    setSavingEdit(true);
+    const supabase = createClient();
+    await supabase
+      .from("task_comments")
+      .update({ body: editingBody.trim() })
+      .eq("id", commentId);
+    setSavingEdit(false);
+    setEditingCommentId(null);
+    setEditingBody("");
+    loadComments();
+  }
 
   function toggleTag(id: string) {
     setTaggedIds((prev) => {
@@ -159,15 +193,53 @@ export function TaskCommentsDialog({
                     })}
                   </span>
                 </div>
-                <p className="mt-1 whitespace-pre-wrap text-sm">{comment.body}</p>
-                {comment.mentionedIds.length > 0 && (
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    {comment.mentionedIds.map((id) => (
-                      <Badge key={id} variant="secondary">
-                        @{nameById.get(id) ?? "Unknown"}
-                      </Badge>
-                    ))}
+                {editingCommentId === comment.id ? (
+                  <div className="mt-1 flex flex-col gap-2">
+                    <Textarea
+                      value={editingBody}
+                      onChange={(e) => setEditingBody(e.target.value)}
+                    />
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="xs"
+                        onClick={cancelEditComment}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        size="xs"
+                        disabled={savingEdit}
+                        onClick={() => saveEditComment(comment.id)}
+                      >
+                        {savingEdit ? "Saving…" : "Save"}
+                      </Button>
+                    </div>
                   </div>
+                ) : (
+                  <>
+                    <p className="mt-1 whitespace-pre-wrap text-sm">{comment.body}</p>
+                    {comment.mentionedIds.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {comment.mentionedIds.map((id) => (
+                          <Badge key={id} variant="secondary">
+                            @{nameById.get(id) ?? "Unknown"}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                    {comment.author_id === currentUserId && (
+                      <button
+                        type="button"
+                        className="mt-1.5 text-xs text-muted-foreground underline"
+                        onClick={() => startEditComment(comment)}
+                      >
+                        Edit
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             ))}
