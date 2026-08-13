@@ -10,6 +10,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const RESOURCE_LINKS = [
+  {
+    href: "https://claude.ai/code/artifact/df61a5c6-7792-4746-8553-593fe1a602ed",
+    label: "User Guide",
+    external: true,
+  },
   { href: "/dashboard/resources/contacts", label: "Contacts" },
   { href: "/dashboard/resources/exec-board", label: "Exec Board" },
   {
