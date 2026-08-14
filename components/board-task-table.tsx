@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -67,6 +69,23 @@ function ownerSelectionFor(task: TaskRow): string {
   return "unassigned";
 }
 
+function ownerUpdatePayload(selection: string) {
+  if (selection === "unassigned") {
+    return { owner_id: null, pending_owner_email: null, assigned_to_everyone: false };
+  }
+  if (selection === "everyone") {
+    return { owner_id: null, pending_owner_email: null, assigned_to_everyone: true };
+  }
+  if (selection.startsWith(PENDING_PREFIX)) {
+    return {
+      owner_id: null,
+      pending_owner_email: selection.slice(PENDING_PREFIX.length),
+      assigned_to_everyone: false,
+    };
+  }
+  return { owner_id: selection, pending_owner_email: null, assigned_to_everyone: false };
+}
+
 export function BoardTaskTable({
   boardId,
   boards,
@@ -82,11 +101,29 @@ export function BoardTaskTable({
 }) {
   const router = useRouter();
   const [showCompleted, setShowCompleted] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const completedCount = tasks.filter((t) => t.status === "done").length;
   const visibleTasks = showCompleted
     ? tasks
     : tasks.filter((t) => t.status !== "done");
+
+  const selectedCount = selectedIds.size;
+  const allVisibleSelected =
+    visibleTasks.length > 0 && visibleTasks.every((t) => selectedIds.has(t.id));
+
+  function toggleSelected(taskId: string, checked: boolean) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (checked) next.add(taskId);
+      else next.delete(taskId);
+      return next;
+    });
+  }
+
+  function toggleSelectAll(checked: boolean) {
+    setSelectedIds(checked ? new Set(visibleTasks.map((t) => t.id)) : new Set());
+  }
 
   async function updateStatus(taskId: string, status: TaskStatus) {
     const supabase = createClient();
@@ -96,19 +133,27 @@ export function BoardTaskTable({
 
   async function updateOwner(taskId: string, selection: string) {
     const supabase = createClient();
-    const payload =
-      selection === "unassigned"
-        ? { owner_id: null, pending_owner_email: null, assigned_to_everyone: false }
-        : selection === "everyone"
-          ? { owner_id: null, pending_owner_email: null, assigned_to_everyone: true }
-          : selection.startsWith(PENDING_PREFIX)
-            ? {
-                owner_id: null,
-                pending_owner_email: selection.slice(PENDING_PREFIX.length),
-                assigned_to_everyone: false,
-              }
-            : { owner_id: selection, pending_owner_email: null, assigned_to_everyone: false };
-    await supabase.from("tasks").update(payload).eq("id", taskId);
+    await supabase.from("tasks").update(ownerUpdatePayload(selection)).eq("id", taskId);
+    router.refresh();
+  }
+
+  async function bulkUpdateOwner(selection: string) {
+    const supabase = createClient();
+    await supabase
+      .from("tasks")
+      .update(ownerUpdatePayload(selection))
+      .in("id", Array.from(selectedIds));
+    setSelectedIds(new Set());
+    router.refresh();
+  }
+
+  async function bulkUpdateDueDate(dueDate: string) {
+    const supabase = createClient();
+    await supabase
+      .from("tasks")
+      .update({ due_date: dueDate || null })
+      .in("id", Array.from(selectedIds));
+    setSelectedIds(new Set());
     router.refresh();
   }
 
@@ -144,18 +189,71 @@ export function BoardTaskTable({
         </div>
       )}
 
+      {selectedCount > 0 && (
+        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-muted/40 px-3 py-2">
+          <span className="text-sm font-medium">
+            {selectedCount} task{selectedCount === 1 ? "" : "s"} selected
+          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground">Assign to</span>
+            <Select value="" onValueChange={(v) => v && bulkUpdateOwner(v)}>
+              <SelectTrigger size="sm" className="w-[160px]">
+                <SelectValue placeholder="Choose…" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
+                <SelectItem value="everyone">Everyone</SelectItem>
+                {members.map((m) => (
+                  <SelectItem key={m.id} value={m.id}>
+                    {m.name}
+                  </SelectItem>
+                ))}
+                {pendingMembers.map((p) => (
+                  <SelectItem key={p.email} value={`${PENDING_PREFIX}${p.email}`}>
+                    {p.name} (pending signup)
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-muted-foreground">Set due date</span>
+            <Input
+              type="date"
+              className="h-8 w-[150px] text-sm"
+              onChange={(e) => e.target.value && bulkUpdateDueDate(e.target.value)}
+            />
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-auto"
+            onClick={() => setSelectedIds(new Set())}
+          >
+            Clear selection
+          </Button>
+        </div>
+      )}
+
       <div className="flex flex-col gap-3 sm:hidden">
         {visibleTasks.map((task) => (
           <Card key={task.id}>
             <CardContent className="flex flex-col gap-2 py-3">
-              <p className="text-sm font-medium">
-                {task.title}
-                {task.recurrence_rule && (
-                  <span className="ml-2 text-xs capitalize text-muted-foreground">
-                    ({task.recurrence_rule})
-                  </span>
-                )}
-              </p>
+              <div className="flex items-start gap-2">
+                <Checkbox
+                  className="mt-1"
+                  checked={selectedIds.has(task.id)}
+                  onCheckedChange={(checked) => toggleSelected(task.id, checked === true)}
+                />
+                <p className="text-sm font-medium">
+                  {task.title}
+                  {task.recurrence_rule && (
+                    <span className="ml-2 text-xs capitalize text-muted-foreground">
+                      ({task.recurrence_rule})
+                    </span>
+                  )}
+                </p>
+              </div>
               <Select
                 value={ownerSelectionFor(task)}
                 onValueChange={(v) => v && updateOwner(task.id, v)}
@@ -289,6 +387,12 @@ export function BoardTaskTable({
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-10">
+                <Checkbox
+                  checked={allVisibleSelected}
+                  onCheckedChange={(checked) => toggleSelectAll(checked === true)}
+                />
+              </TableHead>
               <TableHead>Title</TableHead>
               <TableHead>Owner</TableHead>
               <TableHead>Due</TableHead>
@@ -302,6 +406,12 @@ export function BoardTaskTable({
           <TableBody>
             {visibleTasks.map((task) => (
               <TableRow key={task.id}>
+                <TableCell>
+                  <Checkbox
+                    checked={selectedIds.has(task.id)}
+                    onCheckedChange={(checked) => toggleSelected(task.id, checked === true)}
+                  />
+                </TableCell>
                 <TableCell className="font-medium">
                   {task.title}
                   {task.recurrence_rule && (
@@ -322,7 +432,7 @@ export function BoardTaskTable({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="unassigned">Unassigned</SelectItem>
-                  <SelectItem value="everyone">Everyone</SelectItem>
+                      <SelectItem value="everyone">Everyone</SelectItem>
                       {members.map((m) => (
                         <SelectItem key={m.id} value={m.id}>
                           {m.name}
@@ -445,7 +555,7 @@ export function BoardTaskTable({
             ))}
             {visibleTasks.length === 0 && (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground">
+                <TableCell colSpan={9} className="text-center text-muted-foreground">
                   {tasks.length === 0
                     ? "No tasks on this board yet."
                     : 'All tasks are done. Click "Show completed" above to see them.'}
