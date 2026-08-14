@@ -44,6 +44,7 @@ interface TaskRow {
   description: string | null;
   owner_id: string | null;
   pending_owner_email: string | null;
+  assigned_to_everyone: boolean;
   due_date: string | null;
   status: TaskStatus;
   priority: string;
@@ -60,6 +61,7 @@ interface Board {
 const PENDING_PREFIX = "pending:";
 
 function ownerSelectionFor(task: TaskRow): string {
+  if (task.assigned_to_everyone) return "everyone";
   if (task.owner_id) return task.owner_id;
   if (task.pending_owner_email) return `${PENDING_PREFIX}${task.pending_owner_email}`;
   return "unassigned";
@@ -96,16 +98,23 @@ export function BoardTaskTable({
     const supabase = createClient();
     const payload =
       selection === "unassigned"
-        ? { owner_id: null, pending_owner_email: null }
-        : selection.startsWith(PENDING_PREFIX)
-          ? { owner_id: null, pending_owner_email: selection.slice(PENDING_PREFIX.length) }
-          : { owner_id: selection, pending_owner_email: null };
+        ? { owner_id: null, pending_owner_email: null, assigned_to_everyone: false }
+        : selection === "everyone"
+          ? { owner_id: null, pending_owner_email: null, assigned_to_everyone: true }
+          : selection.startsWith(PENDING_PREFIX)
+            ? {
+                owner_id: null,
+                pending_owner_email: selection.slice(PENDING_PREFIX.length),
+                assigned_to_everyone: false,
+              }
+            : { owner_id: selection, pending_owner_email: null, assigned_to_everyone: false };
     await supabase.from("tasks").update(payload).eq("id", taskId);
     router.refresh();
   }
 
   function ownerSelectLabel(v: string) {
     if (v === "unassigned") return "Unassigned";
+    if (v === "everyone") return "Everyone";
     if (v.startsWith(PENDING_PREFIX)) {
       const email = v.slice(PENDING_PREFIX.length);
       const name = pendingMembers.find((p) => p.email === email)?.name;
@@ -158,6 +167,7 @@ export function BoardTaskTable({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="unassigned">Unassigned</SelectItem>
+                  <SelectItem value="everyone">Everyone</SelectItem>
                   {members.map((m) => (
                     <SelectItem key={m.id} value={m.id}>
                       {m.name}
@@ -224,6 +234,7 @@ export function BoardTaskTable({
                     description: task.description ?? "",
                     owner_id: task.owner_id,
                     pending_owner_email: task.pending_owner_email,
+                    assigned_to_everyone: task.assigned_to_everyone,
                     due_date: task.due_date ?? "",
                     status: task.status,
                     priority: task.priority,
@@ -246,6 +257,7 @@ export function BoardTaskTable({
                     description: task.description ?? "",
                     owner_id: task.owner_id,
                     pending_owner_email: task.pending_owner_email,
+                    assigned_to_everyone: task.assigned_to_everyone,
                     due_date: task.due_date ?? "",
                     status: "not_started",
                     priority: task.priority,
@@ -310,6 +322,7 @@ export function BoardTaskTable({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="unassigned">Unassigned</SelectItem>
+                  <SelectItem value="everyone">Everyone</SelectItem>
                       {members.map((m) => (
                         <SelectItem key={m.id} value={m.id}>
                           {m.name}
@@ -388,6 +401,7 @@ export function BoardTaskTable({
                         description: task.description ?? "",
                         owner_id: task.owner_id,
                         pending_owner_email: task.pending_owner_email,
+                        assigned_to_everyone: task.assigned_to_everyone,
                         due_date: task.due_date ?? "",
                         status: task.status,
                         priority: task.priority,
@@ -410,6 +424,7 @@ export function BoardTaskTable({
                         description: task.description ?? "",
                         owner_id: task.owner_id,
                         pending_owner_email: task.pending_owner_email,
+                        assigned_to_everyone: task.assigned_to_everyone,
                         due_date: task.due_date ?? "",
                         status: "not_started",
                         priority: task.priority,

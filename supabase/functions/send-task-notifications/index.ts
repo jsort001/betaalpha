@@ -67,6 +67,23 @@ function taskSlackText(
   );
 }
 
+// Emails every recipient, then posts a single Slack message (not one
+// per person, since the channel already broadcasts to everyone).
+async function notifyEveryone(
+  recipients: { email: string }[],
+  subject: string,
+  emailHtml: string,
+  slackText: string
+): Promise<boolean> {
+  let anyOk = false;
+  for (const recipient of recipients) {
+    const ok = await sendEmail(recipient.email, subject, emailHtml);
+    if (ok) anyOk = true;
+  }
+  if (anyOk) await postToSlack(slackText);
+  return anyOk;
+}
+
 Deno.serve(async () => {
   const now = new Date();
   const today = now.toISOString().slice(0, 10);
@@ -93,36 +110,43 @@ Deno.serve(async () => {
   // regenerate_recurring_task() sets owner_id on the fresh row.
   const { data: assigned, error: assignedError } = await supabase
     .from("tasks")
-    .select("id, title, due_date, owner_id, board_id")
-    .not("owner_id", "is", null)
+    .select("id, title, due_date, owner_id, assigned_to_everyone, board_id")
+    .or("owner_id.not.is.null,assigned_to_everyone.eq.true")
     .is("assigned_notified_at", null);
   if (assignedError) errors.push(`assigned query: ${assignedError.message}`);
 
   for (const task of assigned ?? []) {
-    const owner = userById.get(task.owner_id as string);
-    if (!owner) continue;
-    const ok = await sendEmail(
-      owner.email,
-      `New task assigned: ${task.title}`,
-      taskEmailBody(
-        "You've been assigned a new task" +
-          (task.due_date ? `, due ${task.due_date}` : "") +
-          ":",
-        task.title,
-        boardNameById.get(task.board_id) ?? "a board",
-        task.board_id
-      )
+    const boardName = boardNameById.get(task.board_id) ?? "a board";
+    const subject = `New task assigned: ${task.title}`;
+    const body = taskEmailBody(
+      "You've been assigned a new task" +
+        (task.due_date ? `, due ${task.due_date}` : "") +
+        ":",
+      task.title,
+      boardName,
+      task.board_id
     );
-    if (ok) {
-      await postToSlack(
-        taskSlackText(
-          "📌 New task assigned:",
-          task.title,
-          owner.name,
-          boardNameById.get(task.board_id) ?? "a board",
-          task.board_id
-        )
+
+    let ok: boolean;
+    if (task.assigned_to_everyone) {
+      ok = await notifyEveryone(
+        users ?? [],
+        subject,
+        body,
+        taskSlackText("📌 New task assigned to everyone:", task.title, "Everyone", boardName, task.board_id)
       );
+    } else {
+      const owner = userById.get(task.owner_id as string);
+      if (!owner) continue;
+      ok = await sendEmail(owner.email, subject, body);
+      if (ok) {
+        await postToSlack(
+          taskSlackText("📌 New task assigned:", task.title, owner.name, boardName, task.board_id)
+        );
+      }
+    }
+
+    if (ok) {
       const { error: updateError } = await supabase
         .from("tasks")
         .update({ assigned_notified_at: new Date().toISOString() })
@@ -135,9 +159,9 @@ Deno.serve(async () => {
   // Due soon (within the next 3 days).
   const { data: dueSoon, error: dueSoonError } = await supabase
     .from("tasks")
-    .select("id, title, due_date, owner_id, board_id")
+    .select("id, title, due_date, owner_id, assigned_to_everyone, board_id")
     .neq("status", "done")
-    .not("owner_id", "is", null)
+    .or("owner_id.not.is.null,assigned_to_everyone.eq.true")
     .not("due_date", "is", null)
     .gte("due_date", today)
     .lte("due_date", soonCutoff)
@@ -145,28 +169,35 @@ Deno.serve(async () => {
   if (dueSoonError) errors.push(`due soon query: ${dueSoonError.message}`);
 
   for (const task of dueSoon ?? []) {
-    const owner = userById.get(task.owner_id as string);
-    if (!owner) continue;
-    const ok = await sendEmail(
-      owner.email,
-      `Task due soon: ${task.title}`,
-      taskEmailBody(
-        `This task is due ${task.due_date}:`,
-        task.title,
-        boardNameById.get(task.board_id) ?? "a board",
-        task.board_id
-      )
+    const boardName = boardNameById.get(task.board_id) ?? "a board";
+    const subject = `Task due soon: ${task.title}`;
+    const body = taskEmailBody(
+      `This task is due ${task.due_date}:`,
+      task.title,
+      boardName,
+      task.board_id
     );
-    if (ok) {
-      await postToSlack(
-        taskSlackText(
-          "⏰ Task due soon:",
-          task.title,
-          owner.name,
-          boardNameById.get(task.board_id) ?? "a board",
-          task.board_id
-        )
+
+    let ok: boolean;
+    if (task.assigned_to_everyone) {
+      ok = await notifyEveryone(
+        users ?? [],
+        subject,
+        body,
+        taskSlackText("⏰ Task due soon (everyone):", task.title, "Everyone", boardName, task.board_id)
       );
+    } else {
+      const owner = userById.get(task.owner_id as string);
+      if (!owner) continue;
+      ok = await sendEmail(owner.email, subject, body);
+      if (ok) {
+        await postToSlack(
+          taskSlackText("⏰ Task due soon:", task.title, owner.name, boardName, task.board_id)
+        );
+      }
+    }
+
+    if (ok) {
       const { error: updateError } = await supabase
         .from("tasks")
         .update({ due_soon_notified_at: new Date().toISOString() })
@@ -179,37 +210,44 @@ Deno.serve(async () => {
   // Overdue.
   const { data: overdue, error: overdueError } = await supabase
     .from("tasks")
-    .select("id, title, due_date, owner_id, board_id")
+    .select("id, title, due_date, owner_id, assigned_to_everyone, board_id")
     .neq("status", "done")
-    .not("owner_id", "is", null)
+    .or("owner_id.not.is.null,assigned_to_everyone.eq.true")
     .not("due_date", "is", null)
     .lt("due_date", today)
     .is("overdue_notified_at", null);
   if (overdueError) errors.push(`overdue query: ${overdueError.message}`);
 
   for (const task of overdue ?? []) {
-    const owner = userById.get(task.owner_id as string);
-    if (!owner) continue;
-    const ok = await sendEmail(
-      owner.email,
-      `Task overdue: ${task.title}`,
-      taskEmailBody(
-        `This task was due ${task.due_date} and is now overdue:`,
-        task.title,
-        boardNameById.get(task.board_id) ?? "a board",
-        task.board_id
-      )
+    const boardName = boardNameById.get(task.board_id) ?? "a board";
+    const subject = `Task overdue: ${task.title}`;
+    const body = taskEmailBody(
+      `This task was due ${task.due_date} and is now overdue:`,
+      task.title,
+      boardName,
+      task.board_id
     );
-    if (ok) {
-      await postToSlack(
-        taskSlackText(
-          "🚨 Task overdue:",
-          task.title,
-          owner.name,
-          boardNameById.get(task.board_id) ?? "a board",
-          task.board_id
-        )
+
+    let ok: boolean;
+    if (task.assigned_to_everyone) {
+      ok = await notifyEveryone(
+        users ?? [],
+        subject,
+        body,
+        taskSlackText("🚨 Task overdue (everyone):", task.title, "Everyone", boardName, task.board_id)
       );
+    } else {
+      const owner = userById.get(task.owner_id as string);
+      if (!owner) continue;
+      ok = await sendEmail(owner.email, subject, body);
+      if (ok) {
+        await postToSlack(
+          taskSlackText("🚨 Task overdue:", task.title, owner.name, boardName, task.board_id)
+        );
+      }
+    }
+
+    if (ok) {
       const { error: updateError } = await supabase
         .from("tasks")
         .update({ overdue_notified_at: new Date().toISOString() })

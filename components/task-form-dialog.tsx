@@ -69,6 +69,7 @@ export interface TaskFormValues {
   description: string;
   owner_id: string | null;
   pending_owner_email: string | null;
+  assigned_to_everyone: boolean;
   due_date: string;
   status: TaskStatus;
   priority: string;
@@ -82,6 +83,7 @@ function defaultValues(defaultBoardId: string): TaskFormValues {
     description: "",
     owner_id: null,
     pending_owner_email: null,
+    assigned_to_everyone: false,
     due_date: "",
     status: "not_started",
     priority: "normal",
@@ -247,23 +249,43 @@ export function TaskFormDialog({
 
   function selectOwner(v: string) {
     if (v === "unassigned") {
-      setValues((prev) => ({ ...prev, owner_id: null, pending_owner_email: null }));
+      setValues((prev) => ({
+        ...prev,
+        owner_id: null,
+        pending_owner_email: null,
+        assigned_to_everyone: false,
+      }));
+    } else if (v === "everyone") {
+      setValues((prev) => ({
+        ...prev,
+        owner_id: null,
+        pending_owner_email: null,
+        assigned_to_everyone: true,
+      }));
     } else if (v.startsWith(PENDING_PREFIX)) {
       setValues((prev) => ({
         ...prev,
         owner_id: null,
         pending_owner_email: v.slice(PENDING_PREFIX.length),
+        assigned_to_everyone: false,
       }));
     } else {
-      setValues((prev) => ({ ...prev, owner_id: v, pending_owner_email: null }));
+      setValues((prev) => ({
+        ...prev,
+        owner_id: v,
+        pending_owner_email: null,
+        assigned_to_everyone: false,
+      }));
     }
   }
 
-  const ownerSelection = values.owner_id
-    ? values.owner_id
-    : values.pending_owner_email
-      ? `${PENDING_PREFIX}${values.pending_owner_email}`
-      : "unassigned";
+  const ownerSelection = values.assigned_to_everyone
+    ? "everyone"
+    : values.owner_id
+      ? values.owner_id
+      : values.pending_owner_email
+        ? `${PENDING_PREFIX}${values.pending_owner_email}`
+        : "unassigned";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -276,6 +298,7 @@ export function TaskFormDialog({
       description: values.description || null,
       owner_id: values.owner_id,
       pending_owner_email: values.pending_owner_email,
+      assigned_to_everyone: values.assigned_to_everyone,
       due_date: values.due_date || null,
       status: values.status,
       priority: values.priority,
@@ -362,6 +385,7 @@ export function TaskFormDialog({
                       <SelectValue placeholder="Unassigned">
                         {(v: string) => {
                           if (v === "unassigned") return "Unassigned";
+                          if (v === "everyone") return "Everyone";
                           if (v.startsWith(PENDING_PREFIX)) {
                             const email = v.slice(PENDING_PREFIX.length);
                             const name = pendingMembers.find((p) => p.email === email)?.name;
@@ -373,6 +397,7 @@ export function TaskFormDialog({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="unassigned">Unassigned</SelectItem>
+                      <SelectItem value="everyone">Everyone</SelectItem>
                       {members.map((m) => (
                         <SelectItem key={m.id} value={m.id}>
                           {m.name}

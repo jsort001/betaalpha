@@ -27,6 +27,7 @@ export default async function SearchPage({
     title: string;
     board_id: string;
     owner_id: string | null;
+    assigned_to_everyone: boolean;
     due_date: string | null;
     status: "not_started" | "in_progress" | "done" | "blocked";
   }[] = [];
@@ -36,7 +37,7 @@ export default async function SearchPage({
     const safe = query.replace(/[,()]/g, " ").trim();
     const { data } = await supabase
       .from("tasks")
-      .select("id, title, board_id, owner_id, due_date, status")
+      .select("id, title, board_id, owner_id, assigned_to_everyone, due_date, status")
       .or(`title.ilike.%${safe}%,description.ilike.%${safe}%`)
       .order("due_date", { ascending: true, nullsFirst: false });
     results = data ?? [];
@@ -64,9 +65,11 @@ export default async function SearchPage({
                   <p className="font-medium">{task.title}</p>
                   <p className="text-sm text-muted-foreground">
                     {boardNameById.get(task.board_id)} ·{" "}
-                    {task.owner_id
-                      ? memberNameById.get(task.owner_id) ?? "Unknown"
-                      : "Unassigned"}
+                    {task.assigned_to_everyone
+                      ? "Everyone"
+                      : task.owner_id
+                        ? memberNameById.get(task.owner_id) ?? "Unknown"
+                        : "Unassigned"}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">

@@ -45,6 +45,7 @@ interface MyTask {
   priority: string;
   recurrence_rule: RecurrenceRule | null;
   owner_id: string | null;
+  assigned_to_everyone: boolean;
   commentCount: number;
 }
 
@@ -73,7 +74,14 @@ export function MyTaskList({
         <Card key={task.id}>
           <CardContent className="flex flex-wrap items-center justify-between gap-3 py-4">
             <div>
-              <p className="font-medium">{task.title}</p>
+              <p className="font-medium">
+                {task.title}
+                {task.assigned_to_everyone && (
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">
+                    (Everyone)
+                  </span>
+                )}
+              </p>
               <p className="text-sm text-muted-foreground">{task.board_name}</p>
             </div>
             <div className="flex items-center gap-3">
@@ -128,6 +136,7 @@ export function MyTaskList({
                   description: task.description ?? "",
                   owner_id: task.owner_id,
                   pending_owner_email: null,
+                  assigned_to_everyone: task.assigned_to_everyone,
                   due_date: task.due_date ?? "",
                   status: task.status,
                   priority: task.priority,

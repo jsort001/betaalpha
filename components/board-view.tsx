@@ -28,6 +28,7 @@ interface TaskRow {
   description: string | null;
   owner_id: string | null;
   pending_owner_email: string | null;
+  assigned_to_everyone: boolean;
   due_date: string | null;
   status: TaskStatus;
   priority: string;

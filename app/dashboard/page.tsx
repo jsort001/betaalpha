@@ -21,9 +21,9 @@ export default async function DashboardPage() {
     supabase
       .from("tasks")
       .select(
-        "id, title, description, due_date, status, board_id, owner_id, priority, recurrence_rule"
+        "id, title, description, due_date, status, board_id, owner_id, assigned_to_everyone, priority, recurrence_rule"
       )
-      .eq("owner_id", currentUser.id)
+      .or(`owner_id.eq.${currentUser.id},assigned_to_everyone.eq.true`)
       .neq("status", "done")
       .order("due_date", { ascending: true, nullsFirst: false }),
     supabase.from("boards").select("id, name, description, category").order("name"),

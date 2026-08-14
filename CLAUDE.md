@@ -31,6 +31,13 @@ Lambda Upsilon Lambda Fraternity, Incorporated. Built for ~5 undergrads and
   — the hand-written `Database` type in `lib/supabase/types.ts` doesn't
   model relationships. Do manual `Map` joins instead, as every existing page
   does.
+- A task's owner is one of three mutually exclusive states, enforced by a
+  DB check constraint (`tasks_single_assignment_target`, migration 0023):
+  an individual (`owner_id` or `pending_owner_email`), `assigned_to_everyone`
+  (broadcasts to the whole chapter), or unassigned (all null/false). Every
+  place that reads or writes owner state needs to handle all three — grep
+  for `assigned_to_everyone` to find them all (task dialogs, board/list/
+  kanban views, My Tasks, search, and the notification edge function).
 - Migrations are sequentially numbered in `supabase/migrations/`, applied
   live with `supabase db push --yes`. **Before rewriting a trigger function
   or policy that appears in more than one migration, grep for every

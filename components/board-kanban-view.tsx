@@ -44,6 +44,7 @@ interface TaskRow {
   description: string | null;
   owner_id: string | null;
   pending_owner_email: string | null;
+  assigned_to_everyone: boolean;
   due_date: string | null;
   status: TaskStatus;
   priority: string;
@@ -138,6 +139,7 @@ function TaskCard({
             description: task.description ?? "",
             owner_id: task.owner_id,
             pending_owner_email: task.pending_owner_email,
+            assigned_to_everyone: task.assigned_to_everyone,
             due_date: task.due_date ?? "",
             status: task.status,
             priority: task.priority,
@@ -180,6 +182,7 @@ function TaskCard({
               description: task.description ?? "",
               owner_id: task.owner_id,
               pending_owner_email: task.pending_owner_email,
+              assigned_to_everyone: task.assigned_to_everyone,
               due_date: task.due_date ?? "",
               status: task.status,
               priority: task.priority,
