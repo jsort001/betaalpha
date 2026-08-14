@@ -115,6 +115,20 @@ export function BoardFormDialog({
     router.refresh();
   }
 
+  async function handleDelete() {
+    if (!values.id) return;
+    if (
+      !confirm(
+        `Delete "${values.name}"? This also deletes every task on this board. This can't be undone.`
+      )
+    )
+      return;
+    const supabase = createClient();
+    await supabase.from("boards").delete().eq("id", values.id);
+    setOpen(false);
+    router.refresh();
+  }
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={trigger} />
@@ -194,7 +208,17 @@ export function BoardFormDialog({
             </Select>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className={values.id ? "sm:justify-between" : undefined}>
+            {values.id && (
+              <Button
+                type="button"
+                variant="ghost"
+                className="text-destructive"
+                onClick={handleDelete}
+              >
+                Delete
+              </Button>
+            )}
             <Button type="submit" disabled={saving}>
               {saving ? "Saving…" : "Save"}
             </Button>
