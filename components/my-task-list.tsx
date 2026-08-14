@@ -12,7 +12,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { STATUS_LABELS } from "@/components/status-badge";
-import { DueDateBadge } from "@/components/due-date-badge";
+import { TaskPrioritySelect } from "@/components/task-priority-select";
+import { TaskDueDateInput } from "@/components/task-due-date-input";
 import { TaskFormDialog } from "@/components/task-form-dialog";
 import { TaskCommentsDialog } from "@/components/task-comments-dialog";
 import { TaskHistoryDialog } from "@/components/task-history-dialog";
@@ -76,7 +77,8 @@ export function MyTaskList({
               <p className="text-sm text-muted-foreground">{task.board_name}</p>
             </div>
             <div className="flex items-center gap-3">
-              <DueDateBadge dueDate={task.due_date} />
+              <TaskDueDateInput taskId={task.id} dueDate={task.due_date} />
+              <TaskPrioritySelect taskId={task.id} priority={task.priority} />
               <Select
                 value={task.status}
                 onValueChange={(v) => v && updateStatus(task.id, v as TaskStatus)}

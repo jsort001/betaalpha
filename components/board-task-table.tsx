@@ -12,7 +12,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -22,8 +21,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { STATUS_LABELS } from "@/components/status-badge";
-import { DueDateBadge } from "@/components/due-date-badge";
 import { TaskFormDialog } from "@/components/task-form-dialog";
+import { TaskPrioritySelect } from "@/components/task-priority-select";
+import { TaskDueDateInput } from "@/components/task-due-date-input";
 import { TaskCommentsDialog } from "@/components/task-comments-dialog";
 import { TaskHistoryDialog } from "@/components/task-history-dialog";
 import type { TaskStatus } from "@/lib/supabase/types";
@@ -171,10 +171,8 @@ export function BoardTaskTable({
                 </SelectContent>
               </Select>
               <div className="flex flex-wrap items-center gap-2">
-                <DueDateBadge dueDate={task.due_date} done={task.status === "done"} />
-                <Badge variant="outline" className="capitalize">
-                  {task.priority}
-                </Badge>
+                <TaskDueDateInput taskId={task.id} dueDate={task.due_date} />
+                <TaskPrioritySelect taskId={task.id} priority={task.priority} />
               </div>
               <Select
                 value={task.status}
@@ -326,7 +324,7 @@ export function BoardTaskTable({
                   </Select>
                 </TableCell>
                 <TableCell>
-                  <DueDateBadge dueDate={task.due_date} done={task.status === "done"} />
+                  <TaskDueDateInput taskId={task.id} dueDate={task.due_date} />
                 </TableCell>
                 <TableCell>
                   <Select
@@ -346,8 +344,8 @@ export function BoardTaskTable({
                     </SelectContent>
                   </Select>
                 </TableCell>
-                <TableCell className="capitalize text-muted-foreground">
-                  {task.priority}
+                <TableCell>
+                  <TaskPrioritySelect taskId={task.id} priority={task.priority} />
                 </TableCell>
                 <TableCell>
                   <TaskCommentsDialog

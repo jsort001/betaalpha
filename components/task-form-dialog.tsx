@@ -26,7 +26,7 @@ import {
 import { STATUS_LABELS } from "@/components/status-badge";
 import type { RecurrenceRule, TaskStatus } from "@/lib/supabase/types";
 
-const PRIORITY_LABELS: Record<string, string> = {
+export const PRIORITY_LABELS: Record<string, string> = {
   low: "Low",
   normal: "Normal",
   high: "High",
