@@ -5,6 +5,7 @@ import { BoardFormDialog } from "@/components/board-form-dialog";
 import { BoardCardGrid } from "@/components/board-card-grid";
 import { MyTaskList } from "@/components/my-task-list";
 import { TaskFormDialog } from "@/components/task-form-dialog";
+import { PENDING_ALUMNI_EXCEPTIONS } from "@/lib/supabase/types";
 
 export default async function DashboardPage() {
   const currentUser = await requireCurrentUser();
@@ -36,7 +37,11 @@ export default async function DashboardPage() {
   const boardNameById = new Map((boards ?? []).map((b) => [b.id, b.name]));
   const signedUpEmails = new Set((members ?? []).map((m) => m.email));
   const pendingMembers = (allowlist ?? [])
-    .filter((a) => a.assigned_role === "undergrad" && !signedUpEmails.has(a.email))
+    .filter(
+      (a) =>
+        (a.assigned_role === "undergrad" || PENDING_ALUMNI_EXCEPTIONS.has(a.email)) &&
+        !signedUpEmails.has(a.email)
+    )
     .map((a) => ({ email: a.email, name: a.name }));
 
   const myTaskIds = (myTasks ?? []).map((t) => t.id);

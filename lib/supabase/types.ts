@@ -19,6 +19,12 @@ export const BOARD_CATEGORIES = [
 ] as const;
 export type BoardCategory = (typeof BOARD_CATEGORIES)[number];
 
+// Pending-owner dropdowns normally only show not-yet-signed-up
+// undergrads (pledges routinely join before their first sign-in).
+// These specific alumni emails are shown too, as a one-off exception —
+// remove an entry once that person signs in.
+export const PENDING_ALUMNI_EXCEPTIONS = new Set(["jose.umana@launidadlatina.org"]);
+
 // Static titles for boards that recur on a predictable schedule, kept
 // consistent across years for tracking purposes. Add new ones here as
 // they come up.

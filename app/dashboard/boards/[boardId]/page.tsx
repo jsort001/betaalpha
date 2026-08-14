@@ -3,6 +3,7 @@ import { requireCurrentUser } from "@/lib/current-user";
 import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { BoardView } from "@/components/board-view";
+import { PENDING_ALUMNI_EXCEPTIONS } from "@/lib/supabase/types";
 
 export default async function BoardPage({
   params,
@@ -46,7 +47,11 @@ export default async function BoardPage({
   const nameById = new Map((members ?? []).map((m) => [m.id, m.name]));
   const signedUpEmails = new Set((members ?? []).map((m) => m.email));
   const pendingMembers = (allowlist ?? [])
-    .filter((a) => a.assigned_role === "undergrad" && !signedUpEmails.has(a.email))
+    .filter(
+      (a) =>
+        (a.assigned_role === "undergrad" || PENDING_ALUMNI_EXCEPTIONS.has(a.email)) &&
+        !signedUpEmails.has(a.email)
+    )
     .map((a) => ({ email: a.email, name: a.name }));
   const pendingNameByEmail = new Map(pendingMembers.map((p) => [p.email, p.name]));
 
