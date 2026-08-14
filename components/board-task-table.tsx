@@ -57,6 +57,14 @@ interface Board {
   name: string;
 }
 
+const PENDING_PREFIX = "pending:";
+
+function ownerSelectionFor(task: TaskRow): string {
+  if (task.owner_id) return task.owner_id;
+  if (task.pending_owner_email) return `${PENDING_PREFIX}${task.pending_owner_email}`;
+  return "unassigned";
+}
+
 export function BoardTaskTable({
   boardId,
   boards,
@@ -82,6 +90,28 @@ export function BoardTaskTable({
     const supabase = createClient();
     await supabase.from("tasks").update({ status }).eq("id", taskId);
     router.refresh();
+  }
+
+  async function updateOwner(taskId: string, selection: string) {
+    const supabase = createClient();
+    const payload =
+      selection === "unassigned"
+        ? { owner_id: null, pending_owner_email: null }
+        : selection.startsWith(PENDING_PREFIX)
+          ? { owner_id: null, pending_owner_email: selection.slice(PENDING_PREFIX.length) }
+          : { owner_id: selection, pending_owner_email: null };
+    await supabase.from("tasks").update(payload).eq("id", taskId);
+    router.refresh();
+  }
+
+  function ownerSelectLabel(v: string) {
+    if (v === "unassigned") return "Unassigned";
+    if (v.startsWith(PENDING_PREFIX)) {
+      const email = v.slice(PENDING_PREFIX.length);
+      const name = pendingMembers.find((p) => p.email === email)?.name;
+      return name ? `${name} (pending)` : email;
+    }
+    return members.find((m) => m.id === v)?.name ?? "Unassigned";
   }
 
   async function deleteTask(taskId: string) {
@@ -117,9 +147,29 @@ export function BoardTaskTable({
                   </span>
                 )}
               </p>
-              <p className="text-xs text-muted-foreground">
-                {task.owner_name ?? "Unassigned"}
-              </p>
+              <Select
+                value={ownerSelectionFor(task)}
+                onValueChange={(v) => v && updateOwner(task.id, v)}
+              >
+                <SelectTrigger size="sm" className="w-[180px]">
+                  <SelectValue placeholder="Unassigned">
+                    {(v: string) => ownerSelectLabel(v)}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                  {members.map((m) => (
+                    <SelectItem key={m.id} value={m.id}>
+                      {m.name}
+                    </SelectItem>
+                  ))}
+                  {pendingMembers.map((p) => (
+                    <SelectItem key={p.email} value={`${PENDING_PREFIX}${p.email}`}>
+                      {p.name} (pending signup)
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <div className="flex flex-wrap items-center gap-2">
                 <DueDateBadge dueDate={task.due_date} done={task.status === "done"} />
                 <Badge variant="outline" className="capitalize">
@@ -250,8 +300,30 @@ export function BoardTaskTable({
                     </span>
                   )}
                 </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {task.owner_name ?? "Unassigned"}
+                <TableCell>
+                  <Select
+                    value={ownerSelectionFor(task)}
+                    onValueChange={(v) => v && updateOwner(task.id, v)}
+                  >
+                    <SelectTrigger size="sm" className="w-[160px]">
+                      <SelectValue placeholder="Unassigned">
+                        {(v: string) => ownerSelectLabel(v)}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unassigned">Unassigned</SelectItem>
+                      {members.map((m) => (
+                        <SelectItem key={m.id} value={m.id}>
+                          {m.name}
+                        </SelectItem>
+                      ))}
+                      {pendingMembers.map((p) => (
+                        <SelectItem key={p.email} value={`${PENDING_PREFIX}${p.email}`}>
+                          {p.name} (pending signup)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </TableCell>
                 <TableCell>
                   <DueDateBadge dueDate={task.due_date} done={task.status === "done"} />
