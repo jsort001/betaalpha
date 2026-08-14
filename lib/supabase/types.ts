@@ -305,6 +305,23 @@ export interface Database {
         }>;
         Relationships: [];
       };
+      calendar_feed_settings: {
+        Row: {
+          id: boolean;
+          token: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: boolean;
+          token: string;
+          updated_at?: string;
+        };
+        Update: Partial<{
+          token: string;
+          updated_at: string;
+        }>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
