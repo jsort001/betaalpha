@@ -56,7 +56,7 @@ export function ResourcesNavMenu() {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger
-        className="font-heading text-sm uppercase tracking-wide outline-none hover:underline"
+        className="text-left font-heading text-sm uppercase tracking-wide outline-none hover:underline"
         onMouseEnter={openNow}
         onMouseLeave={scheduleClose}
       >
