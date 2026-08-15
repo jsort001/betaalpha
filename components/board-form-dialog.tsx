@@ -25,6 +25,7 @@ import {
 import {
   BOARD_CATEGORIES,
   BOARD_TASK_TEMPLATES,
+  RECURRING_BOARD_CATEGORIES,
   RECURRING_BOARD_TITLES,
   type BoardCategory,
 } from "@/lib/supabase/types";
@@ -68,7 +69,7 @@ export function BoardFormDialog({
     setValues((prev) => ({
       ...prev,
       name: v === CUSTOM_NAME ? "" : v,
-      category: v === CUSTOM_NAME ? prev.category : "Intake",
+      category: v === CUSTOM_NAME ? prev.category : RECURRING_BOARD_CATEGORIES[v] ?? prev.category,
     }));
   }
 

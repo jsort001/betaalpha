@@ -31,6 +31,7 @@ export const PENDING_ALUMNI_EXCEPTIONS = new Set(["jose.umana@launidadlatina.org
 export const RECURRING_BOARD_TITLES = [
   "Fall Informational",
   "Spring Informational",
+  "Homecoming Tailgate",
 ] as const;
 
 // Tasks auto-created on a new board when its name matches a key here.
@@ -45,9 +46,23 @@ const INFORMATIONAL_TASK_TEMPLATE = [
   "Distribute flyers",
 ];
 
+const HOMECOMING_TAILGATE_TASK_TEMPLATE = [
+  "Create budget for food, drinks, and materials",
+  "Send invite to alumni in advance of event",
+];
+
 export const BOARD_TASK_TEMPLATES: Record<string, string[]> = {
   "Fall Informational": INFORMATIONAL_TASK_TEMPLATE,
   "Spring Informational": INFORMATIONAL_TASK_TEMPLATE,
+  "Homecoming Tailgate": HOMECOMING_TAILGATE_TASK_TEMPLATE,
+};
+
+// Default board category applied when a recurring title is picked
+// (custom-named boards keep whatever the user last selected).
+export const RECURRING_BOARD_CATEGORIES: Record<string, BoardCategory> = {
+  "Fall Informational": "Intake",
+  "Spring Informational": "Intake",
+  "Homecoming Tailgate": "Social",
 };
 
 export interface Database {
