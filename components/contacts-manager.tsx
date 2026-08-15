@@ -115,24 +115,9 @@ export function ContactsManager({ contacts }: { contacts: Contact[] }) {
           <TableBody>
             {sortedContacts.map((contact) => (
               <TableRow key={contact.id}>
-                <TableCell className="font-medium">{contact.name}</TableCell>
-                <TableCell className="text-muted-foreground">
-                  {contact.pledge_year ?? "—"}
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {contact.phone ?? "—"}
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {contact.email ?? "—"}
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {contact.job_title ?? "—"}
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {contact.employer ?? "—"}
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
+                <TableCell className="font-medium">
+                  <div className="flex items-center gap-2">
+                    {contact.name}
                     <ContactFormDialog
                       trigger={
                         <Button variant="outline" size="sm">
@@ -156,15 +141,32 @@ export function ContactsManager({ contacts }: { contacts: Contact[] }) {
                         location: contact.location ?? "",
                       }}
                     />
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-destructive"
-                      onClick={() => handleRemove(contact.id)}
-                    >
-                      Remove
-                    </Button>
                   </div>
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {contact.pledge_year ?? "—"}
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {contact.phone ?? "—"}
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {contact.email ?? "—"}
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {contact.job_title ?? "—"}
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {contact.employer ?? "—"}
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive"
+                    onClick={() => handleRemove(contact.id)}
+                  >
+                    Remove
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
