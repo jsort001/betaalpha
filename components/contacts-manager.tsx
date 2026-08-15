@@ -105,10 +105,10 @@ export function ContactsManager({ contacts }: { contacts: Contact[] }) {
                   Pledge Year{sortIndicator("pledge_year")}
                 </button>
               </TableHead>
-              <TableHead>Job Title</TableHead>
-              <TableHead>Employer</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Email</TableHead>
+              <TableHead>Job Title</TableHead>
+              <TableHead>Employer</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -120,16 +120,16 @@ export function ContactsManager({ contacts }: { contacts: Contact[] }) {
                   {contact.pledge_year ?? "—"}
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {contact.job_title ?? "—"}
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {contact.employer ?? "—"}
-                </TableCell>
-                <TableCell className="text-muted-foreground">
                   {contact.phone ?? "—"}
                 </TableCell>
                 <TableCell className="text-muted-foreground">
                   {contact.email ?? "—"}
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {contact.job_title ?? "—"}
+                </TableCell>
+                <TableCell className="text-muted-foreground">
+                  {contact.employer ?? "—"}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
