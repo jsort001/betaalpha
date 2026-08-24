@@ -9,63 +9,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { summarizeHistoryEntry, type HistoryRow } from "@/lib/task-history";
 
 interface Member {
   id: string;
   name: string;
-}
-
-interface HistoryRow {
-  id: string;
-  changed_by: string | null;
-  change_type: string;
-  details: Record<string, unknown> | null;
-  created_at: string;
-}
-
-const FIELD_LABELS: Record<string, string> = {
-  title: "title",
-  description: "description",
-  due_date: "due date",
-  priority: "priority",
-  recurrence_rule: "recurrence",
-  board_id: "board",
-};
-
-function summarize(row: HistoryRow, nameById: Map<string, string>): string {
-  const who = row.changed_by ? nameById.get(row.changed_by) ?? "Someone" : "System";
-
-  if (row.change_type === "created") {
-    return `${who} created this task`;
-  }
-  if (row.change_type === "deleted") {
-    return `${who} deleted this task`;
-  }
-
-  const details = row.details as { old?: Record<string, unknown>; new?: Record<string, unknown> } | null;
-  const oldRow = details?.old;
-  const newRow = details?.new;
-
-  if (row.change_type === "status_changed" && oldRow && newRow) {
-    return `${who} changed status: ${oldRow.status} → ${newRow.status}`;
-  }
-
-  if (row.change_type === "reassigned" && oldRow && newRow) {
-    const fromName = oldRow.owner_id ? nameById.get(oldRow.owner_id as string) ?? "someone" : "Unassigned";
-    const toName = newRow.owner_id ? nameById.get(newRow.owner_id as string) ?? "someone" : "Unassigned";
-    return `${who} reassigned owner: ${fromName} → ${toName}`;
-  }
-
-  if (oldRow && newRow) {
-    const changedFields = Object.keys(FIELD_LABELS).filter(
-      (key) => JSON.stringify(oldRow[key]) !== JSON.stringify(newRow[key])
-    );
-    if (changedFields.length > 0) {
-      return `${who} updated ${changedFields.map((f) => FIELD_LABELS[f]).join(", ")}`;
-    }
-  }
-
-  return `${who} updated this task`;
 }
 
 function completionDuration(rows: HistoryRow[]): string | null {
@@ -139,7 +87,7 @@ export function TaskHistoryDialog({
             )}
             {rows.map((row) => (
               <div key={row.id} className="border-b border-border pb-2 last:border-0">
-                <p className="text-sm">{summarize(row, nameById)}</p>
+                <p className="text-sm">{summarizeHistoryEntry(row, nameById)}</p>
                 <p className="text-xs text-muted-foreground">
                   {new Date(row.created_at).toLocaleString(undefined, {
                     month: "short",
