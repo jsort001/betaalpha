@@ -5,6 +5,8 @@ interface CalendarEvent {
   location: string | null;
   start_date: string;
   end_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
 }
 
 function escapeText(value: string): string {
@@ -47,6 +49,22 @@ function addOneDay(date: string): string {
   return d.toISOString().slice(0, 10);
 }
 
+// Floating (no TZID) local date-time, formatted from the Date object's
+// own local getters rather than toISOString — that would reinterpret
+// the wall-clock time in UTC and shift it.
+function formatIcsLocalDateTime(d: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}` +
+    `T${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`
+  );
+}
+
+function eventDateTime(date: string, time: string): Date {
+  const t = time.length === 5 ? `${time}:00` : time;
+  return new Date(`${date}T${t}`);
+}
+
 export function buildEventsIcs(events: CalendarEvent[], calendarName: string): string {
   const now = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
 
@@ -58,13 +76,28 @@ export function buildEventsIcs(events: CalendarEvent[], calendarName: string): s
     "METHOD:PUBLISH",
     `X-WR-CALNAME:${escapeText(calendarName)}`,
     ...events.flatMap((event) => {
-      const dtend = addOneDay(event.end_date ?? event.start_date);
+      let dtstartLine: string;
+      let dtendLine: string;
+
+      if (event.start_time) {
+        const start = eventDateTime(event.start_date, event.start_time);
+        const end = event.end_time
+          ? eventDateTime(event.end_date ?? event.start_date, event.end_time)
+          : new Date(start.getTime() + 60 * 60 * 1000); // default 1hr duration
+        dtstartLine = `DTSTART:${formatIcsLocalDateTime(start)}`;
+        dtendLine = `DTEND:${formatIcsLocalDateTime(end)}`;
+      } else {
+        const dtend = addOneDay(event.end_date ?? event.start_date);
+        dtstartLine = `DTSTART;VALUE=DATE:${toIcsDate(event.start_date)}`;
+        dtendLine = `DTEND;VALUE=DATE:${toIcsDate(dtend)}`;
+      }
+
       const eventLines = [
         "BEGIN:VEVENT",
         `UID:${event.id}@betaalpha-pm`,
         `DTSTAMP:${now}`,
-        `DTSTART;VALUE=DATE:${toIcsDate(event.start_date)}`,
-        `DTEND;VALUE=DATE:${toIcsDate(dtend)}`,
+        dtstartLine,
+        dtendLine,
         `SUMMARY:${escapeText(event.title)}`,
       ];
       if (event.description) eventLines.push(`DESCRIPTION:${escapeText(event.description)}`);

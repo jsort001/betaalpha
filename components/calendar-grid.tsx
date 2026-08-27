@@ -16,6 +16,8 @@ interface EventRow {
   location: string | null;
   start_date: string;
   end_date: string | null;
+  start_time: string | null;
+  end_time: string | null;
 }
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -53,6 +55,23 @@ function formatDateRange(start: string, end: string | null) {
   if (!end || end === start) return startLabel;
   const endLabel = new Date(`${end}T00:00:00`).toLocaleDateString(undefined, opts);
   return `${startLabel} – ${endLabel}`;
+}
+
+function formatTime(time: string) {
+  const t = time.length === 5 ? `${time}:00` : time;
+  return new Date(`2000-01-01T${t}`).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function formatEventDateTime(event: EventRow) {
+  const dateLabel = formatDateRange(event.start_date, event.end_date);
+  if (!event.start_time) return dateLabel;
+  const timeLabel = event.end_time
+    ? `${formatTime(event.start_time)} – ${formatTime(event.end_time)}`
+    : formatTime(event.start_time);
+  return `${dateLabel} · ${timeLabel}`;
 }
 
 export function CalendarGrid({
@@ -101,7 +120,7 @@ export function CalendarGrid({
           <div>
             <CardTitle className="text-base">{event.title}</CardTitle>
             <p className="text-sm text-muted-foreground">
-              {formatDateRange(event.start_date, event.end_date)}
+              {formatEventDateTime(event)}
               {event.location ? ` · ${event.location}` : ""}
             </p>
           </div>
@@ -120,6 +139,8 @@ export function CalendarGrid({
                   location: event.location ?? "",
                   start_date: event.start_date,
                   end_date: event.end_date ?? "",
+                  start_time: event.start_time ?? "",
+                  end_time: event.end_time ?? "",
                 }}
               />
               <DeleteEventButton eventId={event.id} />
@@ -225,6 +246,11 @@ export function CalendarGrid({
                             variant="secondary"
                             className="w-full cursor-pointer justify-start truncate"
                           >
+                            {event.start_time && (
+                              <span className="text-muted-foreground">
+                                {formatTime(event.start_time)}{" "}
+                              </span>
+                            )}
                             {event.title}
                           </Badge>
                         );
@@ -233,7 +259,7 @@ export function CalendarGrid({
                             key={event.id}
                             trigger={pill}
                             title={event.title}
-                            dateLabel={formatDateRange(event.start_date, event.end_date)}
+                            dateLabel={formatEventDateTime(event)}
                             location={event.location}
                             description={event.description}
                           />
@@ -258,7 +284,7 @@ export function CalendarGrid({
                     <span>
                       {event.title}
                       <span className="ml-2 text-xs text-muted-foreground">
-                        {formatDateRange(event.start_date, event.end_date)}
+                        {formatEventDateTime(event)}
                       </span>
                     </span>
                     <div className="flex gap-2">
@@ -275,6 +301,8 @@ export function CalendarGrid({
                           location: event.location ?? "",
                           start_date: event.start_date,
                           end_date: event.end_date ?? "",
+                          start_time: event.start_time ?? "",
+                          end_time: event.end_time ?? "",
                         }}
                       />
                       <DeleteEventButton eventId={event.id} />

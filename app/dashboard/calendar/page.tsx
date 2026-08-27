@@ -13,7 +13,7 @@ export default async function CalendarPage() {
   const [{ data: events }, { data: feedSettings }, origin] = await Promise.all([
     supabase
       .from("events")
-      .select("id, title, description, location, start_date, end_date")
+      .select("id, title, description, location, start_date, end_date, start_time, end_time")
       .order("start_date", { ascending: true }),
     supabase.from("calendar_feed_settings").select("token").eq("id", true).single(),
     getSiteOrigin(),

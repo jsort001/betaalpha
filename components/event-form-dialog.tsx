@@ -23,6 +23,8 @@ export interface EventFormValues {
   location: string;
   start_date: string;
   end_date: string;
+  start_time: string;
+  end_time: string;
 }
 
 const DEFAULT_VALUES: EventFormValues = {
@@ -31,6 +33,8 @@ const DEFAULT_VALUES: EventFormValues = {
   location: "",
   start_date: "",
   end_date: "",
+  start_time: "",
+  end_time: "",
 };
 
 export function EventFormDialog({
@@ -60,6 +64,8 @@ export function EventFormDialog({
       location: values.location || null,
       start_date: values.start_date,
       end_date: values.end_date || null,
+      start_time: values.start_time || null,
+      end_time: values.start_time ? values.end_time || null : null,
     };
 
     if (values.id) {
@@ -133,7 +139,29 @@ export function EventFormDialog({
                 onChange={(e) => update("end_date", e.target.value)}
               />
             </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="event-start-time">Start time</Label>
+              <Input
+                id="event-start-time"
+                type="time"
+                value={values.start_time}
+                onChange={(e) => update("start_time", e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="event-end-time">End time</Label>
+              <Input
+                id="event-end-time"
+                type="time"
+                disabled={!values.start_time}
+                value={values.end_time}
+                onChange={(e) => update("end_time", e.target.value)}
+              />
+            </div>
           </div>
+          <p className="text-xs text-muted-foreground">
+            Leave times blank for an all-day event.
+          </p>
 
           <DialogFooter>
             <Button type="submit" disabled={saving}>

@@ -307,6 +307,8 @@ export interface Database {
           location: string | null;
           start_date: string;
           end_date: string | null;
+          start_time: string | null;
+          end_time: string | null;
           created_by: string | null;
           created_at: string;
         };
@@ -317,6 +319,8 @@ export interface Database {
           location?: string | null;
           start_date: string;
           end_date?: string | null;
+          start_time?: string | null;
+          end_time?: string | null;
           created_by?: string | null;
           created_at?: string;
         };
@@ -326,6 +330,8 @@ export interface Database {
           location: string | null;
           start_date: string;
           end_date: string | null;
+          start_time: string | null;
+          end_time: string | null;
         }>;
         Relationships: [];
       };

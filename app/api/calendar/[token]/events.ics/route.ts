@@ -28,7 +28,7 @@ export async function GET(
 
   const { data: events } = await supabase
     .from("events")
-    .select("id, title, description, location, start_date, end_date")
+    .select("id, title, description, location, start_date, end_date, start_time, end_time")
     .order("start_date", { ascending: true });
 
   const ics = buildEventsIcs(events ?? [], "Beta Alpha Chapter Events");
