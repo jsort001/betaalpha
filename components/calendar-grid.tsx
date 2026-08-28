@@ -76,10 +76,8 @@ function formatEventDateTime(event: EventRow) {
 
 export function CalendarGrid({
   events,
-  isAlumni,
 }: {
   events: EventRow[];
-  isAlumni: boolean;
 }) {
   const today = new Date();
   const [mode, setMode] = useState<"grid" | "agenda">("agenda");
@@ -124,28 +122,26 @@ export function CalendarGrid({
               {event.location ? ` · ${event.location}` : ""}
             </p>
           </div>
-          {isAlumni && (
-            <div className="flex gap-2">
-              <EventFormDialog
-                trigger={
-                  <Button variant="outline" size="sm">
-                    Edit
-                  </Button>
-                }
-                initial={{
-                  id: event.id,
-                  title: event.title,
-                  description: event.description ?? "",
-                  location: event.location ?? "",
-                  start_date: event.start_date,
-                  end_date: event.end_date ?? "",
-                  start_time: event.start_time ?? "",
-                  end_time: event.end_time ?? "",
-                }}
-              />
-              <DeleteEventButton eventId={event.id} />
-            </div>
-          )}
+          <div className="flex gap-2">
+            <EventFormDialog
+              trigger={
+                <Button variant="outline" size="sm">
+                  Edit
+                </Button>
+              }
+              initial={{
+                id: event.id,
+                title: event.title,
+                description: event.description ?? "",
+                location: event.location ?? "",
+                start_date: event.start_date,
+                end_date: event.end_date ?? "",
+                start_time: event.start_time ?? "",
+                end_time: event.end_time ?? "",
+              }}
+            />
+            <DeleteEventButton eventId={event.id} />
+          </div>
         </CardHeader>
         {event.description && (
           <CardContent className="text-sm text-muted-foreground">
@@ -272,7 +268,7 @@ export function CalendarGrid({
             </div>
           </div>
 
-          {isAlumni && events.length > 0 && (
+          {events.length > 0 && (
             <div className="flex flex-col gap-2">
               <h3 className="text-sm font-semibold text-muted-foreground">Manage events</h3>
               <div className="flex flex-col gap-2">

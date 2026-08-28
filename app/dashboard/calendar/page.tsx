@@ -43,13 +43,11 @@ export default async function CalendarPage() {
               }
             />
           )}
-          {isAlumni && (
-            <EventFormDialog trigger={<Button size="sm">New event</Button>} />
-          )}
+          <EventFormDialog trigger={<Button size="sm">New event</Button>} />
         </div>
       </div>
 
-      <CalendarGrid events={events ?? []} isAlumni={isAlumni} />
+      <CalendarGrid events={events ?? []} />
     </div>
   );
 }
