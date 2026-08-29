@@ -20,14 +20,24 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const SITE_DESCRIPTION =
+  "Task and project management for the Beta Alpha chapter of La Unidad Latina, Lambda Upsilon Lambda Fraternity, Incorporated.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://betaalpha.vercel.app"),
   title: "Beta Alpha Project Manager",
-  description:
-    "Task and project management for the Beta Alpha chapter of La Unidad Latina, Lambda Upsilon Lambda Fraternity, Incorporated.",
+  description: SITE_DESCRIPTION,
   openGraph: {
     title: "Beta Alpha Project Manager",
-    description:
-    "Task and project management for the Beta Alpha chapter of La Unidad Latina, Lambda Upsilon Lambda Fraternity, Incorporated.",
+    description: SITE_DESCRIPTION,
+    type: "website",
+    images: [{ url: "/logo.png", width: 4032, height: 4500 }],
+  },
+  twitter: {
+    card: "summary",
+    title: "Beta Alpha Project Manager",
+    description: SITE_DESCRIPTION,
+    images: ["/logo.png"],
   },
 };
 
