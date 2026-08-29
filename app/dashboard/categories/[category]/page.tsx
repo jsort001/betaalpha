@@ -24,6 +24,7 @@ export default async function CategoryPage({
     .from("boards")
     .select("id, name, description, category")
     .eq("category", category)
+    .is("deleted_at", null)
     .order("name");
 
   const boardIds = (boards ?? []).map((b) => b.id);

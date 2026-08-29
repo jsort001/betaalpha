@@ -26,7 +26,7 @@ export default async function BoardPage({
       .select("id, name, description, category")
       .eq("id", boardId)
       .maybeSingle(),
-    supabase.from("boards").select("id, name").order("name"),
+    supabase.from("boards").select("id, name").is("deleted_at", null).order("name"),
     supabase
       .from("tasks")
       .select(

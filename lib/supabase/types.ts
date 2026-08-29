@@ -113,17 +113,20 @@ export interface Database {
           name: string;
           description: string | null;
           category: BoardCategory | null;
+          deleted_at: string | null;
         };
         Insert: {
           id?: string;
           name: string;
           description?: string | null;
           category?: BoardCategory | null;
+          deleted_at?: string | null;
         };
         Update: Partial<{
           name: string;
           description: string | null;
           category: BoardCategory | null;
+          deleted_at: string | null;
         }>;
         Relationships: [];
       };

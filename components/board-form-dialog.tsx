@@ -128,12 +128,15 @@ export function BoardFormDialog({
     if (!values.id) return;
     if (
       !confirm(
-        `Delete "${values.name}"? This also deletes every task on this board. This can't be undone.`
+        `Delete "${values.name}"? Its tasks will be hidden along with it. An alumni can restore it from Admin > Trash, or permanently delete it.`
       )
     )
       return;
     const supabase = createClient();
-    const { error } = await supabase.from("boards").delete().eq("id", values.id);
+    const { error } = await supabase
+      .from("boards")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", values.id);
     if (reportWriteError("delete the board", error)) return;
     setOpen(false);
     router.refresh();

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { requireCurrentUser } from "@/lib/current-user";
 import { SignOutButton } from "@/components/sign-out-button";
 import { ResourcesNavMenu } from "@/components/resources-nav-menu";
+import { AdminNavMenu } from "@/components/admin-nav-menu";
 import { MobileNav } from "@/components/mobile-nav";
 import { Input } from "@/components/ui/input";
 import { BOARD_CATEGORIES } from "@/lib/supabase/types";
@@ -73,11 +74,7 @@ export default async function DashboardLayout({
                     </Link>
                   ))}
                   <ResourcesNavMenu />
-                  {currentUser.role === "alumni" && (
-                    <Link href="/dashboard/admin/allowlist" className="hover:underline">
-                      Admin
-                    </Link>
-                  )}
+                  {currentUser.role === "alumni" && <AdminNavMenu />}
                 </nav>
                 <div className="flex items-center justify-end gap-3 text-sm">
                   <span className="text-base font-medium">

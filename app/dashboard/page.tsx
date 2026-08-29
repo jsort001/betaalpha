@@ -26,7 +26,11 @@ export default async function DashboardPage() {
       .or(`owner_id.eq.${currentUser.id},assigned_to_everyone.eq.true`)
       .neq("status", "done")
       .order("due_date", { ascending: true, nullsFirst: false }),
-    supabase.from("boards").select("id, name, description, category").order("name"),
+    supabase
+      .from("boards")
+      .select("id, name, description, category")
+      .is("deleted_at", null)
+      .order("name"),
     supabase.from("tasks").select("board_id, status, due_date").neq("status", "done"),
     supabase.from("users").select("id, name, email").order("name"),
     currentUser.role === "alumni"

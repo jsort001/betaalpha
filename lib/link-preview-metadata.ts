@@ -14,6 +14,7 @@ const STATIC_ROUTE_TITLES: Record<string, string> = {
   "/dashboard/resources/meeting-minutes": "Meeting Minutes",
   "/dashboard/resources/user-guide": "User Guide",
   "/dashboard/admin/allowlist": "Allowlist",
+  "/dashboard/admin/trash": "Trash",
 };
 
 const BOARD_PATH = /^\/dashboard\/boards\/([0-9a-f-]{36})$/i;
