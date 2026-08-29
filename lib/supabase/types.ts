@@ -352,6 +352,30 @@ export interface Database {
         }>;
         Relationships: [];
       };
+      meeting_minutes: {
+        Row: {
+          id: string;
+          meeting_date: string;
+          title: string;
+          body: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          meeting_date: string;
+          title: string;
+          body: string;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: Partial<{
+          meeting_date: string;
+          title: string;
+          body: string;
+        }>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;

@@ -14,6 +14,7 @@ const RESOURCE_LINKS = [
   { href: "/dashboard/resources/contacts", label: "Contacts" },
   { href: "/dashboard/resources/exec-board", label: "Exec Board" },
   { href: "/dashboard/resources/activity", label: "Activity" },
+  { href: "/dashboard/resources/meeting-minutes", label: "Meeting Minutes" },
   {
     href: "https://us06web.zoom.us/j/88469604123?pwd=948rW6ka1crSTpgy7V4Z1cUUJv57XX.1",
     label: "Zoom Meeting",
