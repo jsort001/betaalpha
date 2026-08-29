@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { reportWriteError } from "@/lib/report-write-error";
 import {
   Table,
   TableBody,
@@ -127,32 +128,39 @@ export function BoardTaskTable({
 
   async function updateStatus(taskId: string, status: TaskStatus) {
     const supabase = createClient();
-    await supabase.from("tasks").update({ status }).eq("id", taskId);
+    const { error } = await supabase.from("tasks").update({ status }).eq("id", taskId);
+    reportWriteError("update the status", error);
     router.refresh();
   }
 
   async function updateOwner(taskId: string, selection: string) {
     const supabase = createClient();
-    await supabase.from("tasks").update(ownerUpdatePayload(selection)).eq("id", taskId);
+    const { error } = await supabase
+      .from("tasks")
+      .update(ownerUpdatePayload(selection))
+      .eq("id", taskId);
+    reportWriteError("update the owner", error);
     router.refresh();
   }
 
   async function bulkUpdateOwner(selection: string) {
     const supabase = createClient();
-    await supabase
+    const { error } = await supabase
       .from("tasks")
       .update(ownerUpdatePayload(selection))
       .in("id", Array.from(selectedIds));
+    if (reportWriteError("assign the selected tasks", error)) return;
     setSelectedIds(new Set());
     router.refresh();
   }
 
   async function bulkUpdateDueDate(dueDate: string) {
     const supabase = createClient();
-    await supabase
+    const { error } = await supabase
       .from("tasks")
       .update({ due_date: dueDate || null })
       .in("id", Array.from(selectedIds));
+    if (reportWriteError("set the due date on the selected tasks", error)) return;
     setSelectedIds(new Set());
     router.refresh();
   }
@@ -171,7 +179,8 @@ export function BoardTaskTable({
   async function deleteTask(taskId: string) {
     if (!confirm("Delete this task?")) return;
     const supabase = createClient();
-    await supabase.from("tasks").delete().eq("id", taskId);
+    const { error } = await supabase.from("tasks").delete().eq("id", taskId);
+    reportWriteError("delete the task", error);
     router.refresh();
   }
 

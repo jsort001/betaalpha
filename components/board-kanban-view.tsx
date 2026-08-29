@@ -12,6 +12,7 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { createClient } from "@/lib/supabase/client";
+import { reportWriteError } from "@/lib/report-write-error";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -89,7 +90,8 @@ function TaskCard({
   async function handleDelete() {
     if (!confirm("Delete this task?")) return;
     const supabase = createClient();
-    await supabase.from("tasks").delete().eq("id", task.id);
+    const { error } = await supabase.from("tasks").delete().eq("id", task.id);
+    reportWriteError("delete the task", error);
     router.refresh();
   }
 
@@ -277,7 +279,11 @@ export function BoardKanbanView({
     if (!task || task.status === newStatus) return;
 
     const supabase = createClient();
-    await supabase.from("tasks").update({ status: newStatus }).eq("id", task.id);
+    const { error } = await supabase
+      .from("tasks")
+      .update({ status: newStatus })
+      .eq("id", task.id);
+    reportWriteError("move the task", error);
     router.refresh();
   }
 

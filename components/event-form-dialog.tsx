@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { reportWriteError } from "@/lib/report-write-error";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -68,16 +69,18 @@ export function EventFormDialog({
       end_time: values.start_time ? values.end_time || null : null,
     };
 
+    let error;
     if (values.id) {
-      await supabase.from("events").update(payload).eq("id", values.id);
+      ({ error } = await supabase.from("events").update(payload).eq("id", values.id));
     } else {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      await supabase.from("events").insert({ ...payload, created_by: user!.id });
+      ({ error } = await supabase.from("events").insert({ ...payload, created_by: user!.id }));
     }
 
     setSaving(false);
+    if (reportWriteError("save the event", error)) return;
     setOpen(false);
     router.refresh();
   }

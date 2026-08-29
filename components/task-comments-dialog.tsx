@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { reportWriteError } from "@/lib/report-write-error";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -109,11 +110,12 @@ export function TaskCommentsDialog({
     if (!editingBody.trim()) return;
     setSavingEdit(true);
     const supabase = createClient();
-    await supabase
+    const { error } = await supabase
       .from("task_comments")
       .update({ body: editingBody.trim() })
       .eq("id", commentId);
     setSavingEdit(false);
+    if (reportWriteError("save the comment", error)) return;
     setEditingCommentId(null);
     setEditingBody("");
     loadComments();
@@ -141,19 +143,24 @@ export function TaskCommentsDialog({
       data: { user },
     } = await supabase.auth.getUser();
 
-    const { data: newComment } = await supabase
+    const { data: newComment, error: commentError } = await supabase
       .from("task_comments")
       .insert({ task_id: taskId, author_id: user!.id, body: body.trim() })
       .select("id")
       .single();
+    if (reportWriteError("post the comment", commentError)) {
+      setPosting(false);
+      return;
+    }
 
     if (newComment && taggedIds.size > 0) {
-      await supabase.from("comment_mentions").insert(
+      const { error: mentionError } = await supabase.from("comment_mentions").insert(
         Array.from(taggedIds).map((userId) => ({
           comment_id: newComment.id,
           user_id: userId,
         }))
       );
+      reportWriteError("tag the selected members", mentionError);
     }
 
     setBody("");

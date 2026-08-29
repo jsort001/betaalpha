@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { reportWriteError } from "@/lib/report-write-error";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -72,7 +73,8 @@ export function MyTaskList({
 
   async function updateStatus(taskId: string, status: TaskStatus) {
     const supabase = createClient();
-    await supabase.from("tasks").update({ status }).eq("id", taskId);
+    const { error } = await supabase.from("tasks").update({ status }).eq("id", taskId);
+    reportWriteError("update the status", error);
     router.refresh();
   }
 

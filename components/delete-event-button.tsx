@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { reportWriteError } from "@/lib/report-write-error";
 import { Button } from "@/components/ui/button";
 
 export function DeleteEventButton({ eventId }: { eventId: string }) {
@@ -10,7 +11,8 @@ export function DeleteEventButton({ eventId }: { eventId: string }) {
   async function handleDelete() {
     if (!confirm("Delete this event?")) return;
     const supabase = createClient();
-    await supabase.from("events").delete().eq("id", eventId);
+    const { error } = await supabase.from("events").delete().eq("id", eventId);
+    reportWriteError("delete the event", error);
     router.refresh();
   }
 

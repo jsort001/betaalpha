@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { reportWriteError } from "@/lib/report-write-error";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -56,16 +57,20 @@ export function MeetingMinutesFormDialog({
       body: values.body,
     };
 
+    let error;
     if (values.id) {
-      await supabase.from("meeting_minutes").update(payload).eq("id", values.id);
+      ({ error } = await supabase.from("meeting_minutes").update(payload).eq("id", values.id));
     } else {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      await supabase.from("meeting_minutes").insert({ ...payload, created_by: user!.id });
+      ({ error } = await supabase
+        .from("meeting_minutes")
+        .insert({ ...payload, created_by: user!.id }));
     }
 
     setSaving(false);
+    if (reportWriteError("save the minutes", error)) return;
     setOpen(false);
     router.refresh();
   }

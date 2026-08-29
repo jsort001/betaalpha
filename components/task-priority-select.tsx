@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { reportWriteError } from "@/lib/report-write-error";
 import {
   Select,
   SelectContent,
@@ -26,7 +27,11 @@ export function TaskPrioritySelect({
 
   async function updatePriority(value: string) {
     const supabase = createClient();
-    await supabase.from("tasks").update({ priority: value }).eq("id", taskId);
+    const { error } = await supabase
+      .from("tasks")
+      .update({ priority: value })
+      .eq("id", taskId);
+    reportWriteError("update the priority", error);
     router.refresh();
   }
 

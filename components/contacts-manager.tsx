@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { reportWriteError } from "@/lib/report-write-error";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -73,7 +74,8 @@ export function ContactsManager({ contacts }: { contacts: Contact[] }) {
   async function handleRemove(id: string) {
     if (!confirm("Remove this contact?")) return;
     const supabase = createClient();
-    await supabase.from("contacts").delete().eq("id", id);
+    const { error } = await supabase.from("contacts").delete().eq("id", id);
+    reportWriteError("remove the contact", error);
     router.refresh();
   }
 

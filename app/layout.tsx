@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 // Chapter brand-guide headline font: titles, headings, menus.
@@ -50,6 +51,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${stellar.variable} ${geistMono.variable} antialiased`}>
         {children}
+        <Toaster position="bottom-right" />
       </body>
     </html>
   );

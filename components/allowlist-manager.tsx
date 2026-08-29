@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { reportWriteError } from "@/lib/report-write-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,10 +69,11 @@ export function AllowlistManager({
     e.preventDefault();
     setSaving(true);
     const supabase = createClient();
-    await supabase
+    const { error } = await supabase
       .from("allowlist")
       .upsert({ email: email.trim().toLowerCase(), name, assigned_role: role });
     setSaving(false);
+    if (reportWriteError("add to the allowlist", error)) return;
     setEmail("");
     setName("");
     setRole("undergrad");
@@ -81,7 +83,8 @@ export function AllowlistManager({
   async function handleRemove(entryEmail: string) {
     if (!confirm(`Remove ${entryEmail} from the allowlist?`)) return;
     const supabase = createClient();
-    await supabase.from("allowlist").delete().eq("email", entryEmail);
+    const { error } = await supabase.from("allowlist").delete().eq("email", entryEmail);
+    reportWriteError("remove from the allowlist", error);
     router.refresh();
   }
 

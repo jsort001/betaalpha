@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { reportWriteError } from "@/lib/report-write-error";
 import { parseLocalDate } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,7 +30,8 @@ export function MeetingMinutesManager({ minutes }: { minutes: MeetingMinutes[] }
   async function handleRemove(id: string) {
     if (!confirm("Delete these minutes? This can't be undone.")) return;
     const supabase = createClient();
-    await supabase.from("meeting_minutes").delete().eq("id", id);
+    const { error } = await supabase.from("meeting_minutes").delete().eq("id", id);
+    reportWriteError("delete the minutes", error);
     router.refresh();
   }
 

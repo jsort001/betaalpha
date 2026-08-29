@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { reportWriteError } from "@/lib/report-write-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,8 +46,9 @@ export function ExecBoardManager({
     e.preventDefault();
     setSaving(true);
     const supabase = createClient();
-    await supabase.from("exec_board").insert({ name, position });
+    const { error } = await supabase.from("exec_board").insert({ name, position });
     setSaving(false);
+    if (reportWriteError("add the exec board member", error)) return;
     setName("");
     setPosition(EXEC_POSITIONS[0]);
     router.refresh();
@@ -55,7 +57,8 @@ export function ExecBoardManager({
   async function handleRemove(id: string) {
     if (!confirm("Remove this exec board member?")) return;
     const supabase = createClient();
-    await supabase.from("exec_board").delete().eq("id", id);
+    const { error } = await supabase.from("exec_board").delete().eq("id", id);
+    reportWriteError("remove the exec board member", error);
     router.refresh();
   }
 

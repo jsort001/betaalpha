@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { reportWriteError } from "@/lib/report-write-error";
 import { Input } from "@/components/ui/input";
 
 export function TaskDueDateInput({
@@ -19,7 +20,11 @@ export function TaskDueDateInput({
 
   async function updateDueDate(value: string) {
     const supabase = createClient();
-    await supabase.from("tasks").update({ due_date: value || null }).eq("id", taskId);
+    const { error } = await supabase
+      .from("tasks")
+      .update({ due_date: value || null })
+      .eq("id", taskId);
+    reportWriteError("update the due date", error);
     router.refresh();
   }
 

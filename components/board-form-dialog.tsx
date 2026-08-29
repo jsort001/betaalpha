@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { reportWriteError } from "@/lib/report-write-error";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -88,30 +89,37 @@ export function BoardFormDialog({
     };
 
     if (values.id) {
-      await supabase.from("boards").update(payload).eq("id", values.id);
+      const { error } = await supabase.from("boards").update(payload).eq("id", values.id);
+      setSaving(false);
+      if (reportWriteError("save the board", error)) return;
     } else {
-      const { data: newBoard } = await supabase
+      const { data: newBoard, error: boardError } = await supabase
         .from("boards")
         .insert(payload)
         .select("id")
         .single();
+      if (reportWriteError("create the board", boardError)) {
+        setSaving(false);
+        return;
+      }
 
       const template = BOARD_TASK_TEMPLATES[nameSelection];
       if (newBoard && template) {
         const {
           data: { user },
         } = await supabase.auth.getUser();
-        await supabase.from("tasks").insert(
+        const { error: templateError } = await supabase.from("tasks").insert(
           template.map((title) => ({
             board_id: newBoard.id,
             title,
             created_by: user!.id,
           }))
         );
+        reportWriteError("create the template tasks", templateError);
       }
+      setSaving(false);
     }
 
-    setSaving(false);
     setOpen(false);
     router.refresh();
   }
@@ -125,7 +133,8 @@ export function BoardFormDialog({
     )
       return;
     const supabase = createClient();
-    await supabase.from("boards").delete().eq("id", values.id);
+    const { error } = await supabase.from("boards").delete().eq("id", values.id);
+    if (reportWriteError("delete the board", error)) return;
     setOpen(false);
     router.refresh();
   }

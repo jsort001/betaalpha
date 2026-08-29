@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { reportWriteError } from "@/lib/report-write-error";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -190,11 +191,12 @@ export function TaskFormDialog({
     if (!editingBody.trim() || !taskId) return;
     setSavingEdit(true);
     const supabase = createClient();
-    await supabase
+    const { error } = await supabase
       .from("task_comments")
       .update({ body: editingBody.trim() })
       .eq("id", commentId);
     setSavingEdit(false);
+    if (reportWriteError("save the comment", error)) return;
     setEditingCommentId(null);
     setEditingBody("");
     loadComments(taskId);
@@ -222,19 +224,24 @@ export function TaskFormDialog({
       data: { user },
     } = await supabase.auth.getUser();
 
-    const { data: newComment } = await supabase
+    const { data: newComment, error: commentError } = await supabase
       .from("task_comments")
       .insert({ task_id: taskId, author_id: user!.id, body: commentBody.trim() })
       .select("id")
       .single();
+    if (reportWriteError("post the comment", commentError)) {
+      setPosting(false);
+      return;
+    }
 
     if (newComment && taggedIds.size > 0) {
-      await supabase.from("comment_mentions").insert(
+      const { error: mentionError } = await supabase.from("comment_mentions").insert(
         Array.from(taggedIds).map((userId) => ({
           comment_id: newComment.id,
           user_id: userId,
         }))
       );
+      reportWriteError("tag the selected members", mentionError);
     }
 
     setCommentBody("");
@@ -306,18 +313,20 @@ export function TaskFormDialog({
         values.recurrence_rule === "none" ? null : values.recurrence_rule,
     };
 
+    let error;
     if (values.id) {
-      await supabase.from("tasks").update(payload).eq("id", values.id);
+      ({ error } = await supabase.from("tasks").update(payload).eq("id", values.id));
     } else {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      await supabase
+      ({ error } = await supabase
         .from("tasks")
-        .insert({ ...payload, created_by: user!.id });
+        .insert({ ...payload, created_by: user!.id }));
     }
 
     setSaving(false);
+    if (reportWriteError("save the task", error)) return;
     setOpen(false);
     router.refresh();
   }
