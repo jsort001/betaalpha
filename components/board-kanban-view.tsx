@@ -87,8 +87,9 @@ function TaskCard({
           members={members}
           pendingMembers={pendingMembers}
           trigger={
-            <div
-              className="flex cursor-pointer flex-col gap-2"
+            <button
+              type="button"
+              className="flex w-full cursor-pointer flex-col gap-2 text-left"
               onPointerDown={(e) => e.stopPropagation()}
             >
               <p className="text-sm font-medium">{task.title}</p>
@@ -106,7 +107,7 @@ function TaskCard({
                   {task.priority}
                 </Badge>
               </div>
-            </div>
+            </button>
           }
           initial={{
             id: task.id,
