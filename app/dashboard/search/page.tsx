@@ -33,12 +33,10 @@ export default async function SearchPage({
   }[] = [];
 
   if (query) {
-    // Escape characters that would break PostgREST's .or() filter syntax.
-    const safe = query.replace(/[,()]/g, " ").trim();
     const { data } = await supabase
       .from("tasks")
       .select("id, title, board_id, owner_id, assigned_to_everyone, due_date, status")
-      .or(`title.ilike.%${safe}%,description.ilike.%${safe}%`)
+      .textSearch("search_vector", query, { type: "websearch", config: "english" })
       .order("due_date", { ascending: true, nullsFirst: false });
     results = data ?? [];
   }
