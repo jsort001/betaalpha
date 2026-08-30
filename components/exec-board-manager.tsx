@@ -22,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { EXEC_POSITIONS, type ExecPosition } from "@/lib/supabase/types";
 
 interface ExecBoardMember {
@@ -41,6 +42,7 @@ export function ExecBoardManager({
   const [name, setName] = useState("");
   const [position, setPosition] = useState<ExecPosition>(EXEC_POSITIONS[0]);
   const [saving, setSaving] = useState(false);
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -55,7 +57,7 @@ export function ExecBoardManager({
   }
 
   async function handleRemove(id: string) {
-    if (!confirm("Remove this exec board member?")) return;
+    setPendingRemoveId(null);
     const supabase = createClient();
     const { error } = await supabase.from("exec_board").delete().eq("id", id);
     reportWriteError("remove the exec board member", error);
@@ -125,7 +127,7 @@ export function ExecBoardManager({
                       variant="ghost"
                       size="sm"
                       className="text-destructive"
-                      onClick={() => handleRemove(member.id)}
+                      onClick={() => setPendingRemoveId(member.id)}
                     >
                       Remove
                     </Button>
@@ -143,6 +145,15 @@ export function ExecBoardManager({
           </TableBody>
         </Table>
       </div>
+
+      <ConfirmDialog
+        open={pendingRemoveId !== null}
+        onOpenChange={(open) => !open && setPendingRemoveId(null)}
+        title="Remove this exec board member?"
+        description="This action can't be undone."
+        confirmLabel="Remove"
+        onConfirm={() => pendingRemoveId && handleRemove(pendingRemoveId)}
+      />
     </div>
   );
 }

@@ -24,6 +24,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { STATUS_LABELS } from "@/components/status-badge";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { TaskFormDialog } from "@/components/task-form-dialog";
 import { TaskPrioritySelect } from "@/components/task-priority-select";
 import { TaskDueDateInput } from "@/components/task-due-date-input";
@@ -103,6 +104,7 @@ export function BoardTaskTable({
   const router = useRouter();
   const [showCompleted, setShowCompleted] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const completedCount = tasks.filter((t) => t.status === "done").length;
   const visibleTasks = showCompleted
@@ -177,7 +179,7 @@ export function BoardTaskTable({
   }
 
   async function deleteTask(taskId: string) {
-    if (!confirm("Delete this task?")) return;
+    setPendingDeleteId(null);
     const supabase = createClient();
     const { error } = await supabase.from("tasks").delete().eq("id", taskId);
     reportWriteError("delete the task", error);
@@ -375,7 +377,7 @@ export function BoardTaskTable({
                   variant="ghost"
                   size="sm"
                   className="text-destructive"
-                  onClick={() => deleteTask(task.id)}
+                  onClick={() => setPendingDeleteId(task.id)}
                 >
                   Delete
                 </Button>
@@ -554,7 +556,7 @@ export function BoardTaskTable({
                       variant="ghost"
                       size="sm"
                       className="text-destructive"
-                      onClick={() => deleteTask(task.id)}
+                      onClick={() => setPendingDeleteId(task.id)}
                     >
                       Delete
                     </Button>
@@ -574,6 +576,15 @@ export function BoardTaskTable({
           </TableBody>
         </Table>
       </div>
+
+      <ConfirmDialog
+        open={pendingDeleteId !== null}
+        onOpenChange={(open) => !open && setPendingDeleteId(null)}
+        title="Delete this task?"
+        description="This action can't be undone."
+        confirmLabel="Delete"
+        onConfirm={() => pendingDeleteId && deleteTask(pendingDeleteId)}
+      />
     </div>
   );
 }

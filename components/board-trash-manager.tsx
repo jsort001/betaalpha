@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { reportWriteError } from "@/lib/report-write-error";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 interface TrashedBoard {
   id: string;
@@ -16,6 +18,9 @@ interface TrashedBoard {
 
 export function BoardTrashManager({ boards }: { boards: TrashedBoard[] }) {
   const router = useRouter();
+  const [pendingPurge, setPendingPurge] = useState<{ id: string; name: string } | null>(
+    null
+  );
 
   async function handleRestore(id: string) {
     const supabase = createClient();
@@ -27,9 +32,8 @@ export function BoardTrashManager({ boards }: { boards: TrashedBoard[] }) {
     router.refresh();
   }
 
-  async function handlePurge(id: string, name: string) {
-    if (!confirm(`Permanently delete "${name}" and every task on it? This can't be undone.`))
-      return;
+  async function handlePurge(id: string) {
+    setPendingPurge(null);
     const supabase = createClient();
     const { error } = await supabase.from("boards").delete().eq("id", id);
     reportWriteError("permanently delete the board", error);
@@ -61,7 +65,7 @@ export function BoardTrashManager({ boards }: { boards: TrashedBoard[] }) {
                 variant="ghost"
                 size="sm"
                 className="text-destructive"
-                onClick={() => handlePurge(board.id, board.name)}
+                onClick={() => setPendingPurge({ id: board.id, name: board.name })}
               >
                 Delete forever
               </Button>
@@ -72,6 +76,15 @@ export function BoardTrashManager({ boards }: { boards: TrashedBoard[] }) {
       {boards.length === 0 && (
         <p className="text-sm text-muted-foreground">Trash is empty.</p>
       )}
+
+      <ConfirmDialog
+        open={pendingPurge !== null}
+        onOpenChange={(open) => !open && setPendingPurge(null)}
+        title={pendingPurge ? `Permanently delete "${pendingPurge.name}"?` : ""}
+        description="Every task on this board will be permanently deleted too. This action can't be undone."
+        confirmLabel="Delete forever"
+        onConfirm={() => pendingPurge && handlePurge(pendingPurge.id)}
+      />
     </div>
   );
 }

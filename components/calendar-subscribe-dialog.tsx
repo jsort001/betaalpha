@@ -14,6 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 function randomToken(): string {
   const bytes = new Uint8Array(24);
@@ -38,6 +39,7 @@ export function CalendarSubscribeDialog({
   const [copied, setCopied] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [confirmRegenOpen, setConfirmRegenOpen] = useState(false);
 
   const feedPath = `/api/calendar/${currentToken}/events.ics`;
   const httpsUrl = `${origin}${feedPath}`;
@@ -55,12 +57,7 @@ export function CalendarSubscribeDialog({
   }
 
   async function regenerate() {
-    if (
-      !confirm(
-        "Regenerate the subscribe link? Everyone currently subscribed will need to re-subscribe with the new link."
-      )
-    )
-      return;
+    setConfirmRegenOpen(false);
     setRegenerating(true);
     const supabase = createClient();
     const next = randomToken();
@@ -118,7 +115,7 @@ export function CalendarSubscribeDialog({
               type="button"
               variant="ghost"
               className="text-destructive"
-              onClick={regenerate}
+              onClick={() => setConfirmRegenOpen(true)}
               disabled={regenerating}
             >
               {regenerating ? "Regenerating…" : "Regenerate link"}
@@ -128,6 +125,14 @@ export function CalendarSubscribeDialog({
           )}
         </DialogFooter>
       </DialogContent>
+      <ConfirmDialog
+        open={confirmRegenOpen}
+        onOpenChange={setConfirmRegenOpen}
+        title="Regenerate the subscribe link?"
+        description="Everyone currently subscribed will need to re-subscribe with the new link."
+        confirmLabel="Regenerate"
+        onConfirm={regenerate}
+      />
     </Dialog>
   );
 }

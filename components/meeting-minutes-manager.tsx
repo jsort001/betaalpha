@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { reportWriteError } from "@/lib/report-write-error";
@@ -8,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MeetingMinutesFormDialog } from "@/components/meeting-minutes-form-dialog";
 import { MeetingMinutesDetailsDialog } from "@/components/meeting-minutes-details-dialog";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 interface MeetingMinutes {
   id: string;
@@ -26,9 +28,10 @@ function formatMeetingDate(dateStr: string) {
 
 export function MeetingMinutesManager({ minutes }: { minutes: MeetingMinutes[] }) {
   const router = useRouter();
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
 
   async function handleRemove(id: string) {
-    if (!confirm("Delete these minutes? This can't be undone.")) return;
+    setPendingRemoveId(null);
     const supabase = createClient();
     const { error } = await supabase.from("meeting_minutes").delete().eq("id", id);
     reportWriteError("delete the minutes", error);
@@ -74,7 +77,7 @@ export function MeetingMinutesManager({ minutes }: { minutes: MeetingMinutes[] }
                   variant="ghost"
                   size="sm"
                   className="text-destructive"
-                  onClick={() => handleRemove(entry.id)}
+                  onClick={() => setPendingRemoveId(entry.id)}
                 >
                   Delete
                 </Button>
@@ -86,6 +89,15 @@ export function MeetingMinutesManager({ minutes }: { minutes: MeetingMinutes[] }
       {minutes.length === 0 && (
         <p className="text-sm text-muted-foreground">No meeting minutes yet.</p>
       )}
+
+      <ConfirmDialog
+        open={pendingRemoveId !== null}
+        onOpenChange={(open) => !open && setPendingRemoveId(null)}
+        title="Delete these minutes?"
+        description="This action can't be undone."
+        confirmLabel="Delete"
+        onConfirm={() => pendingRemoveId && handleRemove(pendingRemoveId)}
+      />
     </div>
   );
 }

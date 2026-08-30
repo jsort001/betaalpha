@@ -23,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import type { UserRole } from "@/lib/supabase/types";
 
 interface AllowlistEntry {
@@ -46,6 +47,8 @@ export function AllowlistManager({
   const [sendingNudgeTo, setSendingNudgeTo] = useState<string | null>(null);
   const [nudgeResults, setNudgeResults] = useState<Record<string, string>>({});
   const [statusSortDir, setStatusSortDir] = useState<"asc" | "desc" | null>(null);
+  const [pendingRemoveEmail, setPendingRemoveEmail] = useState<string | null>(null);
+  const [pendingNudgeEmail, setPendingNudgeEmail] = useState<string | null>(null);
   const signedUpSet = new Set(signedUpEmails);
 
   function toggleStatusSort() {
@@ -81,7 +84,7 @@ export function AllowlistManager({
   }
 
   async function handleRemove(entryEmail: string) {
-    if (!confirm(`Remove ${entryEmail} from the allowlist?`)) return;
+    setPendingRemoveEmail(null);
     const supabase = createClient();
     const { error } = await supabase.from("allowlist").delete().eq("email", entryEmail);
     reportWriteError("remove from the allowlist", error);
@@ -89,7 +92,7 @@ export function AllowlistManager({
   }
 
   async function handleSendNudge(entryEmail: string) {
-    if (!confirm(`Send a sign-in reminder to ${entryEmail}?`)) return;
+    setPendingNudgeEmail(null);
     setSendingNudgeTo(entryEmail);
     const supabase = createClient();
     const { error } = await supabase.functions.invoke("send-nudge", {
@@ -198,7 +201,7 @@ export function AllowlistManager({
                         variant="outline"
                         size="sm"
                         disabled={sendingNudgeTo === entry.email}
-                        onClick={() => handleSendNudge(entry.email)}
+                        onClick={() => setPendingNudgeEmail(entry.email)}
                       >
                         {sendingNudgeTo === entry.email ? "Sending…" : "Remind"}
                       </Button>
@@ -207,7 +210,7 @@ export function AllowlistManager({
                       variant="ghost"
                       size="sm"
                       className="text-destructive"
-                      onClick={() => handleRemove(entry.email)}
+                      onClick={() => setPendingRemoveEmail(entry.email)}
                     >
                       Remove
                     </Button>
@@ -225,6 +228,30 @@ export function AllowlistManager({
           </TableBody>
         </Table>
       </div>
+
+      <ConfirmDialog
+        open={pendingRemoveEmail !== null}
+        onOpenChange={(open) => !open && setPendingRemoveEmail(null)}
+        title="Remove from the allowlist?"
+        description={
+          pendingRemoveEmail
+            ? `${pendingRemoveEmail} will no longer be able to sign in.`
+            : ""
+        }
+        confirmLabel="Remove"
+        onConfirm={() => pendingRemoveEmail && handleRemove(pendingRemoveEmail)}
+      />
+      <ConfirmDialog
+        open={pendingNudgeEmail !== null}
+        onOpenChange={(open) => !open && setPendingNudgeEmail(null)}
+        title="Send a sign-in reminder?"
+        description={
+          pendingNudgeEmail ? `We'll email ${pendingNudgeEmail} a reminder to sign in.` : ""
+        }
+        confirmLabel="Send reminder"
+        destructive={false}
+        onConfirm={() => pendingNudgeEmail && handleSendNudge(pendingNudgeEmail)}
+      />
     </div>
   );
 }

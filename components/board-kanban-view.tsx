@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   DndContext,
@@ -22,6 +23,7 @@ import { TaskFormDialog } from "@/components/task-form-dialog";
 import { TaskCommentsDialog } from "@/components/task-comments-dialog";
 import { TaskHistoryDialog } from "@/components/task-history-dialog";
 import { STATUS_LABELS } from "@/components/status-badge";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import type { TaskStatus } from "@/lib/supabase/types";
 
 interface Member {
@@ -76,6 +78,7 @@ function TaskCard({
   pendingMembers: PendingMember[];
 }) {
   const router = useRouter();
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: task.id,
   });
@@ -88,7 +91,7 @@ function TaskCard({
     : undefined;
 
   async function handleDelete() {
-    if (!confirm("Delete this task?")) return;
+    setConfirmOpen(false);
     const supabase = createClient();
     const { error } = await supabase.from("tasks").delete().eq("id", task.id);
     reportWriteError("delete the task", error);
@@ -196,12 +199,20 @@ function TaskCard({
             size="xs"
             className="text-destructive"
             onPointerDown={(e) => e.stopPropagation()}
-            onClick={handleDelete}
+            onClick={() => setConfirmOpen(true)}
           >
             Delete
           </Button>
         </div>
       </CardContent>
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Delete this task?"
+        description="This action can't be undone."
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+      />
     </Card>
   );
 }

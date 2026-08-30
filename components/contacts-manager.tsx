@@ -14,6 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ContactFormDialog } from "@/components/contact-form-dialog";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 interface Contact {
   id: string;
@@ -46,6 +47,7 @@ export function ContactsManager({ contacts }: { contacts: Contact[] }) {
   const router = useRouter();
   const [sortKey, setSortKey] = useState<SortKey>("name");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const [pendingRemoveId, setPendingRemoveId] = useState<string | null>(null);
 
   function toggleSort(key: SortKey) {
     if (sortKey === key) {
@@ -72,7 +74,7 @@ export function ContactsManager({ contacts }: { contacts: Contact[] }) {
   }
 
   async function handleRemove(id: string) {
-    if (!confirm("Remove this contact?")) return;
+    setPendingRemoveId(null);
     const supabase = createClient();
     const { error } = await supabase.from("contacts").delete().eq("id", id);
     reportWriteError("remove the contact", error);
@@ -165,7 +167,7 @@ export function ContactsManager({ contacts }: { contacts: Contact[] }) {
                     variant="ghost"
                     size="sm"
                     className="text-destructive"
-                    onClick={() => handleRemove(contact.id)}
+                    onClick={() => setPendingRemoveId(contact.id)}
                   >
                     Remove
                   </Button>
@@ -182,6 +184,15 @@ export function ContactsManager({ contacts }: { contacts: Contact[] }) {
           </TableBody>
         </Table>
       </div>
+
+      <ConfirmDialog
+        open={pendingRemoveId !== null}
+        onOpenChange={(open) => !open && setPendingRemoveId(null)}
+        title="Remove this contact?"
+        description="This action can't be undone."
+        confirmLabel="Remove"
+        onConfirm={() => pendingRemoveId && handleRemove(pendingRemoveId)}
+      />
     </div>
   );
 }

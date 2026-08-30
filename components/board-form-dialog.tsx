@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import {
   Select,
   SelectContent,
@@ -64,6 +65,7 @@ export function BoardFormDialog({
     initialNameSelection((initial ?? DEFAULT_VALUES).name)
   );
   const [year, setYear] = useState(() => new Date().getFullYear());
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   function selectName(v: string) {
     setNameSelection(v);
@@ -126,12 +128,7 @@ export function BoardFormDialog({
 
   async function handleDelete() {
     if (!values.id) return;
-    if (
-      !confirm(
-        `Delete "${values.name}"? Its tasks will be hidden along with it. An alumni can restore it from Admin > Trash, or permanently delete it.`
-      )
-    )
-      return;
+    setConfirmDeleteOpen(false);
     const supabase = createClient();
     const { error } = await supabase
       .from("boards")
@@ -227,7 +224,7 @@ export function BoardFormDialog({
                 type="button"
                 variant="ghost"
                 className="text-destructive"
-                onClick={handleDelete}
+                onClick={() => setConfirmDeleteOpen(true)}
               >
                 Delete
               </Button>
@@ -238,6 +235,14 @@ export function BoardFormDialog({
           </DialogFooter>
         </form>
       </DialogContent>
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        onOpenChange={setConfirmDeleteOpen}
+        title={`Delete "${values.name}"?`}
+        description="Its tasks will be hidden along with it. An alumni can restore it from Admin → Trash, or permanently delete it."
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+      />
     </Dialog>
   );
 }
