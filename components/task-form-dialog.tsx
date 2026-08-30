@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { STATUS_LABELS } from "@/components/status-badge";
 import type { RecurrenceRule, TaskStatus } from "@/lib/supabase/types";
+import type { Board, Member, PendingMember } from "@/lib/task-types";
 
 export const PRIORITY_LABELS: Record<string, string> = {
   low: "Low",
@@ -39,21 +40,6 @@ const RECURRENCE_LABELS: Record<RecurrenceRule | "none", string> = {
   monthly: "Monthly",
   semester: "Semester",
 };
-
-interface Member {
-  id: string;
-  name: string;
-}
-
-interface PendingMember {
-  email: string;
-  name: string;
-}
-
-interface Board {
-  id: string;
-  name: string;
-}
 
 interface Comment {
   id: string;

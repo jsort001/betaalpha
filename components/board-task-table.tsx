@@ -31,36 +31,7 @@ import { TaskDueDateInput } from "@/components/task-due-date-input";
 import { TaskCommentsDialog } from "@/components/task-comments-dialog";
 import { TaskHistoryDialog } from "@/components/task-history-dialog";
 import type { TaskStatus } from "@/lib/supabase/types";
-
-interface Member {
-  id: string;
-  name: string;
-}
-
-interface PendingMember {
-  email: string;
-  name: string;
-}
-
-interface TaskRow {
-  id: string;
-  title: string;
-  description: string | null;
-  owner_id: string | null;
-  pending_owner_email: string | null;
-  assigned_to_everyone: boolean;
-  due_date: string | null;
-  status: TaskStatus;
-  priority: string;
-  recurrence_rule: "weekly" | "monthly" | "semester" | null;
-  owner_name: string | null;
-  commentCount: number;
-}
-
-interface Board {
-  id: string;
-  name: string;
-}
+import type { Board, Member, PendingMember, TaskRow } from "@/lib/task-types";
 
 const PENDING_PREFIX = "pending:";
 

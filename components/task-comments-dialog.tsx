@@ -13,11 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-
-interface Member {
-  id: string;
-  name: string;
-}
+import type { Member } from "@/lib/task-types";
 
 interface Comment {
   id: string;

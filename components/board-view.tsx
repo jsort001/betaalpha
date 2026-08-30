@@ -5,37 +5,7 @@ import { Button } from "@/components/ui/button";
 import { BoardTaskTable } from "@/components/board-task-table";
 import { BoardKanbanView } from "@/components/board-kanban-view";
 import { TaskFormDialog } from "@/components/task-form-dialog";
-import type { TaskStatus } from "@/lib/supabase/types";
-
-interface Member {
-  id: string;
-  name: string;
-}
-
-interface PendingMember {
-  email: string;
-  name: string;
-}
-
-interface Board {
-  id: string;
-  name: string;
-}
-
-interface TaskRow {
-  id: string;
-  title: string;
-  description: string | null;
-  owner_id: string | null;
-  pending_owner_email: string | null;
-  assigned_to_everyone: boolean;
-  due_date: string | null;
-  status: TaskStatus;
-  priority: string;
-  recurrence_rule: "weekly" | "monthly" | "semester" | null;
-  owner_name: string | null;
-  commentCount: number;
-}
+import type { Board, Member, PendingMember, TaskRow } from "@/lib/task-types";
 
 const STORAGE_KEY = "board-view-mode";
 

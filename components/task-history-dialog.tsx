@@ -10,11 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { summarizeHistoryEntry, type HistoryRow } from "@/lib/task-history";
-
-interface Member {
-  id: string;
-  name: string;
-}
+import type { Member } from "@/lib/task-types";
 
 function completionDuration(rows: HistoryRow[]): string | null {
   const created = rows.find((r) => r.change_type === "created");

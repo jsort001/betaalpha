@@ -27,21 +27,7 @@ import { TaskFormDialog } from "@/components/task-form-dialog";
 import { TaskCommentsDialog } from "@/components/task-comments-dialog";
 import { TaskHistoryDialog } from "@/components/task-history-dialog";
 import type { RecurrenceRule, TaskStatus } from "@/lib/supabase/types";
-
-interface Member {
-  id: string;
-  name: string;
-}
-
-interface PendingMember {
-  email: string;
-  name: string;
-}
-
-interface Board {
-  id: string;
-  name: string;
-}
+import type { Board, Member, PendingMember } from "@/lib/task-types";
 
 interface MyTask {
   id: string;
