@@ -1,6 +1,10 @@
 import { redirect } from "next/navigation";
 import { requireCurrentUser } from "@/lib/current-user";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+
+const GOOGLE_DOC_URL =
+  "https://docs.google.com/document/d/112QpG-C64mjut3U8NnRrOkEoh4OUfXWi0hRCS-u-FkA/edit";
 
 interface ListItem {
   label: string;
@@ -594,14 +598,36 @@ export default async function ChapterConstitutionPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-primary">
-          Chapter Constitution
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          The governing document for the Beta Alpha chapter.
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-primary">
+            Chapter Constitution
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            The governing document for the Beta Alpha chapter.
+          </p>
+        </div>
+        <Button
+          nativeButton={false}
+          render={<a href={GOOGLE_DOC_URL} target="_blank" rel="noopener noreferrer" />}
+        >
+          Open live document
+        </Button>
       </div>
+
+      <p className="text-sm text-muted-foreground">
+        The page below is a read-only reference copy. To propose changes, add comments, or
+        use suggesting mode (track changes), edit the{" "}
+        <a
+          href={GOOGLE_DOC_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary underline underline-offset-2"
+        >
+          live Google Doc
+        </a>
+        . Every alumnus has edit access.
+      </p>
 
       <Card>
         <CardContent className="flex flex-col gap-2 py-4">
