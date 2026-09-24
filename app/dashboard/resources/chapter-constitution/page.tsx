@@ -197,11 +197,11 @@ const ARTICLES: ArticleData[] = [
           p("All members of La Fraternidad shall be recognized as Hermanos of La Unidad Latina, Lambda Upsilon Lambda Fraternity, Inc. In order to qualify for membership, an individual cannot be a member of another social fraternity and must:"),
           list([
             { label: "a.", text: "Be enrolled as a full-time and good standing student at Old Dominion University with a minimum grade point average of 2.8" },
-            { label: "a.", text: "However, for second semester freshman the minimum grade point average must be at least 3.0 on a 4.0 scale" },
-            { label: "b.", text: "Be a gentleman of great character and esteem who has dedicated his life to fulfilling accomplishments in concurrence with the values of La Fraternidad, and" },
-            { label: "c.", text: "Be an interested gentleman of La Fraternidad and complete all necessary interest requirements prior to intake" },
-            { label: "d.", text: "Be approved by the National Council of La Unidad Latina, Lambda Upsilon Lambda Fraternity, Inc. and the Office of Student Life and Learning of Old Dominion University." },
-            { label: "e.", text: "Be able to complete the New Member Education (N.M.E.)" },
+            { label: "b.", text: "However, for second semester freshman the minimum grade point average must be at least 3.0 on a 4.0 scale" },
+            { label: "c.", text: "Be a gentleman of great character and esteem who has dedicated his life to fulfilling accomplishments in concurrence with the values of La Fraternidad, and" },
+            { label: "d.", text: "Be an interested gentleman of La Fraternidad and complete all necessary interest requirements prior to intake" },
+            { label: "e.", text: "Be approved by the National Council of La Unidad Latina, Lambda Upsilon Lambda Fraternity, Inc. and the Office of Student Life and Learning of Old Dominion University." },
+            { label: "f.", text: "Be able to complete the New Member Education (N.M.E.)" },
           ]),
         ],
       },
@@ -405,7 +405,7 @@ const ARTICLES: ArticleData[] = [
             { label: "b.", text: "The following is not permitted: tennis shoes, jeans, t-shirts, hoodies, casual wear." },
             { label: "c.", text: "If an Hermano will be showing up late to chapter or right at the beginning of chapter due to his class or work schedule, he will be excused from dressing up for chapter with prior notification to the Parliamentarian." },
             {
-              label: "f.",
+              label: "d.",
               text: "Dress Code Violations based on the academic semester will be disciplined as followed:",
               children: [
                 { label: "i.", text: "1st Offense: Warning" },
