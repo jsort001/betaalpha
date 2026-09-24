@@ -13,3 +13,10 @@ export function parseLocalDate(dateStr: string): Date {
   const [year, month, day] = dateStr.split("-").map(Number);
   return new Date(year, month - 1, day);
 }
+
+// Only allow same-site relative paths as a post-sign-in redirect target,
+// so a crafted `next` query param can't send someone off-site.
+export function safeNextPath(next: string | null | undefined): string | null {
+  if (!next || !next.startsWith("/") || next.startsWith("//")) return null;
+  return next;
+}

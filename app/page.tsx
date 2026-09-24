@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SignInButton } from "@/components/sign-in-button";
+import { safeNextPath } from "@/lib/utils";
 
 async function checkSupabaseReachable() {
   try {
@@ -20,8 +21,14 @@ async function checkSupabaseReachable() {
   }
 }
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
   const supabase = await createClient();
+  const { next: rawNext } = await searchParams;
+  const next = safeNextPath(rawNext) ?? "/dashboard";
 
   const [{ data: { user } }, connected] = await Promise.all([
     supabase.auth.getUser(),
@@ -29,7 +36,7 @@ export default async function Home() {
   ]);
 
   if (user) {
-    redirect("/dashboard");
+    redirect(next);
   }
 
   return (
@@ -64,7 +71,7 @@ export default async function Home() {
         </CardContent>
       </Card>
 
-      <SignInButton />
+      <SignInButton next={next} />
 
       <p className="max-w-sm text-center text-xs text-muted-foreground">
         Access is limited to allowlisted chapter members. Sign in with the
