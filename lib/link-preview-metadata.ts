@@ -13,6 +13,7 @@ const STATIC_ROUTE_TITLES: Record<string, string> = {
   "/dashboard/resources/activity": "Activity",
   "/dashboard/resources/meeting-minutes": "Meeting Minutes",
   "/dashboard/resources/user-guide": "User Guide",
+  "/dashboard/resources/chapter-constitution": "Chapter Constitution",
   "/dashboard/admin/allowlist": "Allowlist",
   "/dashboard/admin/trash": "Trash",
 };
