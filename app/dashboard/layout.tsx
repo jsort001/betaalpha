@@ -73,7 +73,7 @@ export default async function DashboardLayout({
                       {category}
                     </Link>
                   ))}
-                  <ResourcesNavMenu />
+                  <ResourcesNavMenu isAlumni={currentUser.role === "alumni"} />
                   {currentUser.role === "alumni" && <AdminNavMenu />}
                 </nav>
                 <div className="flex items-center justify-end gap-3 text-sm">

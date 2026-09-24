@@ -1,6 +1,6 @@
-import { NavDropdownMenu } from "@/components/nav-dropdown-menu";
+import { NavDropdownMenu, type NavDropdownLink } from "@/components/nav-dropdown-menu";
 
-const RESOURCE_LINKS = [
+const RESOURCE_LINKS: NavDropdownLink[] = [
   { href: "/dashboard/resources/user-guide", label: "User Guide" },
   { href: "/dashboard/resources/contacts", label: "Contacts" },
   { href: "/dashboard/resources/exec-board", label: "Exec Board" },
@@ -23,6 +23,15 @@ const RESOURCE_LINKS = [
   },
 ];
 
-export function ResourcesNavMenu() {
-  return <NavDropdownMenu label="Resources" links={RESOURCE_LINKS} />;
+export function ResourcesNavMenu({ isAlumni }: { isAlumni: boolean }) {
+  const links = isAlumni
+    ? [
+        ...RESOURCE_LINKS,
+        {
+          href: "/dashboard/resources/chapter-constitution",
+          label: "Chapter Constitution",
+        },
+      ]
+    : RESOURCE_LINKS;
+  return <NavDropdownMenu label="Resources" links={links} />;
 }
